@@ -1,0 +1,45 @@
+.navbar {
+  background-color: #bf810d;
+}
+
+.menuOptions {
+  color: #ffedb4;
+  position: relative;
+  transition: color 450ms;
+}
+
+.menuOptions::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 0.1em;
+  background-color: #ffc400;
+  opacity: 1;
+  transition: opacity 450ms, width 450ms, transform 450ms;
+  transform: scale(0);
+  transform-origin: center;
+}
+
+.menuOptions:hover::after,
+.menuOptions:focus::after {
+  opacity: 1;
+  width: 100%;
+  transform: scale(1);
+}
+
+.menuOptions:hover {
+  color: #ffc400;
+}
+
+@media (max-width: 1024px) {
+  .menu-items {
+    max-width: 300px;
+    background: #4a321f;
+    z-index: 20;
+  }
+  .menu-items.hidde{
+    right: -300px;
+  }
+}
