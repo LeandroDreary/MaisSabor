@@ -79,10 +79,10 @@ const Index = () => {
     });
   };
 
-  HandleLoadProducts();
 
   useEffect(() => {
-    HandleLoadCategories();
+  HandleLoadProducts();
+  HandleLoadCategories();
   }, []);
 
   return (

@@ -12,7 +12,7 @@ import { CategoryType } from "../../components/Forms/Category/CreateOrEdit";
 AOS.init();
 
 const Home = () => {
-  
+
   const [products, setProducts] = useState<ProductType[]>();
 
   const [filters, setFilters] = useState<{ category?: string, search?: string }>()
@@ -55,9 +55,9 @@ const Home = () => {
     });
   };
 
-  HandleLoadProducts();
 
   useEffect(() => {
+    HandleLoadProducts();
     HandleLoadCategories();
   }, []);
 
@@ -109,49 +109,50 @@ const Home = () => {
           Cardápio
         </h2>
         <div className="mt-2 py-4 px-2 mx-2 pb-8 bg-white border rounded shadow-sm">
-            <form onSubmit={e => { e.preventDefault(); HandleLoadProducts() }} className="sm:flex mb-4">
-              <button type="submit" className="w-full sm:w-auto sm:mx-2 bg-yellow-400 duration-300 hover:bg-yellow-700 text-white h-10 py-2 px-6 rounded cursor-pointer">
-                Procurar
-              </button>
-              <div className="w-full my-2 sm:my-0 sm:w-40 h-10 p-1 flex border border-gray-200 rounded">
-                <select onChange={e => setFilters({ category: e.target.value, search: filters?.search })} className="mx-2 text-gray-600 form-select w-full">
-                  <option value="">Todas</option>
-                  {categories &&
-                    categories.map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
-                    ))}
-                </select>
+          <form onSubmit={e => { e.preventDefault(); HandleLoadProducts() }} className="sm:flex mb-4">
+            <button type="submit" className="w-full sm:w-auto sm:mx-2 bg-yellow-400 duration-300 hover:bg-yellow-700 text-white h-10 py-2 px-6 rounded cursor-pointer">
+              Procurar
+            </button>
+            <div className="w-full my-2 sm:my-0 sm:w-40 h-10 p-1 flex border border-gray-200 rounded">
+              <select onChange={e => setFilters({ category: e.target.value, search: filters?.search })} className="mx-2 text-gray-600 form-select w-full">
+                <option value="">Todas</option>
+                {categories &&
+                  categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+            <div className="w-full sm:mx-2">
+              <div className="p-1 flex border border-gray-200 rounded">
+                <input
+                  placeholder="Procurar"
+                  value={filters?.search}
+                  onChange={e => setFilters({ ...filters, search: e.target.value })}
+                  className="p-1 px-2 appearance-none outline-none"
+                />
               </div>
-              <div className="w-full sm:mx-2">
-                <div className="p-1 flex border border-gray-200 rounded">
-                  <input
-                    placeholder="Procurar"
-                    value={filters?.search}
-                    onChange={e => setFilters({ ...filters, search: e.target.value })}
-                    className="p-1 px-2 appearance-none outline-none"
-                  />
-                </div>
-              </div>
-            </form>
-            <hr />
+            </div>
+          </form>
+          <hr />
           <div className="grid grid-cols-6 content-center gap-2 px-2">
             <div className="sm:col-span-6"></div>
-          {loading ? (
-                <span className="col-span-6 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">Carregando
-                  <LoadingIcon className="rotate" />
-                </span>
-              ) : !products || products?.length <= 0 ?
-                <span className="col-span-6 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">Sem resultados encontrados
-                  <IoMdSad />
-                </span>
-                :
-                products.map(product => {
-                  return (
-                    <Card product={product} />
-                  )})
-                }
+            {loading ? (
+              <span className="col-span-6 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">Carregando
+                <LoadingIcon className="rotate" />
+              </span>
+            ) : !products || products?.length <= 0 ?
+              <span className="col-span-6 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">Sem resultados encontrados
+                <IoMdSad />
+              </span>
+              :
+              products.map(product => {
+                return (
+                  <Card product={product} />
+                )
+              })
+            }
           </div>
         </div>
       </div>
