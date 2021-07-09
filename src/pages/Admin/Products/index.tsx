@@ -22,7 +22,7 @@ const Index = () => {
 
   const [loading, setLoading] = useState<boolean>(true);
 
-  const HandleLoadProducts = async () => {
+  const HandleLoadProducts = async (filters: { category?: string, search?: string } | undefined) => {
     setLoading(true);
     // Get the products in the database
     (filters?.category ?
@@ -72,7 +72,7 @@ const Index = () => {
         transaction.delete(productDocRef);
       });
     }).then(() => {
-      HandleLoadProducts();
+      HandleLoadProducts({});
       setPopup("");
     }).catch(error => {
       console.log("Transaction failed: ", error);
@@ -81,7 +81,7 @@ const Index = () => {
 
 
   useEffect(() => {
-  HandleLoadProducts();
+  HandleLoadProducts({});
   HandleLoadCategories();
   }, []);
 
@@ -143,7 +143,7 @@ const Index = () => {
             </Link>
 
             <button
-              onClick={HandleLoadProducts}
+              onClick={() => HandleLoadProducts(filters)}
               className="bg-yellow-500 ease-out duration-300 hover:bg-yellow-700 flex items-center gap-1 text-white py-1 mx-2 my-4 px-3 rounded cursor-pointer">
               Atualizar
             </button>
@@ -151,7 +151,7 @@ const Index = () => {
           <hr />
 
           <div className="mt-2 py-4 px-2 mx-2 pb-8 bg-white border rounded shadow-sm">
-            <form onSubmit={e => { e.preventDefault(); HandleLoadProducts() }} className="flex mb-4">
+            <form onSubmit={e => { e.preventDefault(); HandleLoadProducts(filters) }} className="flex mb-4">
               <button type="submit" className="mx-2 bg-yellow-400 duration-300 hover:bg-yellow-700 text-white h-10 py-2 px-6 rounded cursor-pointer">
                 Procurar
               </button>

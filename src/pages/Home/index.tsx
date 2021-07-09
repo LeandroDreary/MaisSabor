@@ -19,7 +19,7 @@ const Home = () => {
 
   const [loading, setLoading] = useState<boolean>(true);
 
-  const HandleLoadProducts = async () => {
+  const HandleLoadProducts = async (filters: { category?: string, search?: string } | undefined) => {
     setLoading(true);
     // Get the products in the database
     (filters?.category ?
@@ -57,7 +57,7 @@ const Home = () => {
 
 
   useEffect(() => {
-    HandleLoadProducts();
+    HandleLoadProducts({});
     HandleLoadCategories();
   }, []);
 
@@ -109,7 +109,7 @@ const Home = () => {
           Cardápio
         </h2>
         <div className="mt-2 py-4 px-2 mx-2 pb-8 bg-white border rounded shadow-sm">
-          <form onSubmit={e => { e.preventDefault(); HandleLoadProducts() }} className="sm:flex mb-4">
+          <form onSubmit={e => { e.preventDefault(); HandleLoadProducts(filters) }} className="sm:flex mb-4">
             <button type="submit" className="w-full sm:w-auto sm:mx-2 bg-yellow-400 duration-300 hover:bg-yellow-700 text-white h-10 py-2 px-6 rounded cursor-pointer">
               Procurar
             </button>
