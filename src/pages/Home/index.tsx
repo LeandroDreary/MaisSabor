@@ -1,25 +1,76 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./index.css";
 import Navbar from "./../../components/Navbar";
 import Footer from "./../../components/Footer";
 import { Card } from "./../../components/Card";
 import { FaWhatsapp } from "react-icons/fa";
 import AOS from "aos";
-import "aos/dist/aos.css";
+import { ProductType } from "../../components/Forms/Product/CreateOrEdit";
+import { db } from "../../services/firebase";
+import { VscLoading as LoadingIcon, IoMdSad } from "react-icons/all";
+import { CategoryType } from "../../components/Forms/Category/CreateOrEdit";
 AOS.init();
 
 const Home = () => {
+  
+  const [products, setProducts] = useState<ProductType[]>();
+
+  const [filters, setFilters] = useState<{ category?: string, search?: string }>()
+
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const HandleLoadProducts = async () => {
+    setLoading(true);
+    // Get the products in the database
+    (filters?.category ?
+      // If the category is selected, will execute the where condition
+      db.collection("products").where("category", "==", filters?.category) :
+      db.collection("products")
+    ).get().then(querySnapshot => {
+      let myProducts: ProductType[] = [];
+      querySnapshot.forEach(doc => {
+        // Search filter
+        if (
+          String(doc.data()?.name || "").toLowerCase().includes(filters?.search || "") ||
+          String(doc.data()?.description || "").toLowerCase().includes(filters?.search || "")
+        )
+          myProducts.push({ id: doc.id, ...doc.data() })
+      });
+      setProducts(myProducts);
+    }).catch((error) => {
+      console.log("Error getting documents: ", error);
+    }).finally(() => {
+      setLoading(false);
+    });
+  };
+
+  const [categories, setCategories] = useState<CategoryType[]>([]);
+
+  const HandleLoadCategories = async () => {
+    // Load the categories that will show in the category select input
+    await db.collection("categories").get().then((querySnapshot) => {
+      let myCategories: CategoryType[] = [];
+      querySnapshot.forEach(doc => myCategories.push({ id: doc.id, name: doc.data().name }));
+      setCategories(myCategories);
+    });
+  };
+
+  useEffect(() => {
+    HandleLoadProducts();
+    HandleLoadCategories();
+  }, []);
+
   return (
     <>
       <div
-        className="w-full bg-fixed"
+        className="w-full bg-no-repeat min-h-screen sm:min-h-0 bg-fixed"
         style={{
           backgroundImage: "url('/images/background.jpg')",
-          backgroundSize: "100%",
+          backgroundSize: "auto 100vh",
         }}
       >
         <div
-          className="bg-no-repeat bg-full bg-contain"
+          className="min-h-screen sm:min-h-0 bg-no-repeat bg-full bg-contain"
           style={{
             background:
               "linear-gradient(-207deg, rgba(142,96,11,0.7) 0%, rgba(0,0,0,0.85) 100%)",
@@ -42,7 +93,7 @@ const Home = () => {
                 cervejas e drinks!
               </p>
               <hr className="mt-4" />
-              <button className="contact-button mt-8 duration-300 text-gray-800 flex gap-2 items-center py-1 px-4 ease-out rounded">
+              <button className="contact-button text-barbina-brown mt-8 duration-300 flex gap-2 items-center py-1 px-4 ease-out rounded">
                 <span>
                   <FaWhatsapp />
                 </span>
@@ -53,38 +104,53 @@ const Home = () => {
         </div>
       </div>
       <div id="cardapio" className="container mx-auto">
-        <h2 className="text-4xl font-ubuntu text-gray-800 font-semibold my-8 text-center title-underline">
+        <h2 className="text-4xl text-barbina-brown font-ubuntu font-semibold my-8 text-center title-underline">
           Cardápio
         </h2>
-        <div data-aos="fade-right"
-              data-aos-duration="1000" className="mt-2 p-5 pb-8 bg-white border rounded shadow-sm">
-          <div className="flex mb-4">
-            <button
-              style={{ background: "rgb(237, 201, 0)" }}
-              className="mx-2 text-white h-10 py-2 px-6 rounded cursor-pointer"
-            >
-              Procurar
-            </button>
-            <div className="w-40 h-10 p-1 flex border border-gray-200 rounded">
-              <select className="mx-2 form-select w-full">
-                <option value="US">US</option>
-                <option value="Italy">Italy</option>
-                <option value="Spain">Spain</option>
-                <option value="China">China</option>
-              </select>
-            </div>
-            <div className="w-full mx-2">
-              <div className="p-1 flex border border-gray-200 rounded">
-                <input
-                  placeholder="Procurar"
-                  className="p-1 px-2 appearance-none outline-none w-full text-gray-800"
-                />
+        <div className="mt-2 py-4 px-2 mx-2 pb-8 bg-white border rounded shadow-sm">
+            <form onSubmit={e => { e.preventDefault(); HandleLoadProducts() }} className="sm:flex mb-4">
+              <button type="submit" className="w-full sm:w-auto sm:mx-2 bg-yellow-400 duration-300 hover:bg-yellow-700 text-white h-10 py-2 px-6 rounded cursor-pointer">
+                Procurar
+              </button>
+              <div className="w-full my-2 sm:my-0 sm:w-40 h-10 p-1 flex border border-gray-200 rounded">
+                <select onChange={e => setFilters({ category: e.target.value, search: filters?.search })} className="mx-2 text-gray-600 form-select w-full">
+                  <option value="">Todas</option>
+                  {categories &&
+                    categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                </select>
               </div>
-            </div>
-          </div>
-          <hr />
-          <div className="grid grid-cols-4 gap-8">
-            {[1,2,3,4,5,6,7,8,9,0].map(() => <Card />)}
+              <div className="w-full sm:mx-2">
+                <div className="p-1 flex border border-gray-200 rounded">
+                  <input
+                    placeholder="Procurar"
+                    value={filters?.search}
+                    onChange={e => setFilters({ ...filters, search: e.target.value })}
+                    className="p-1 px-2 appearance-none outline-none"
+                  />
+                </div>
+              </div>
+            </form>
+            <hr />
+          <div className="grid grid-cols-6 content-center gap-2 px-2">
+            <div className="sm:col-span-6"></div>
+          {loading ? (
+                <span className="col-span-6 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">Carregando
+                  <LoadingIcon className="rotate" />
+                </span>
+              ) : !products || products?.length <= 0 ?
+                <span className="col-span-6 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">Sem resultados encontrados
+                  <IoMdSad />
+                </span>
+                :
+                products.map(product => {
+                  return (
+                    <Card product={product} />
+                  )})
+                }
           </div>
         </div>
       </div>

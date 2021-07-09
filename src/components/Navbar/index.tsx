@@ -1,11 +1,25 @@
 import React, { useEffect, useState } from "react";
-import {AiOutlineClose as Close} from "react-icons/ai"
+import { AiOutlineClose as Close } from "react-icons/ai"
 import "./index.css";
 import Icon from "./../../assets/images/icon.png";
+import Outclick from "../Outclick";
+import { useAuth } from "../../hooks/Auth";
+import { CgGoogle, CgLogIn } from 'react-icons/all'
 
 const Index = () => {
   const [showNavbarMenu, setShowNavbarMenu] = useState<boolean>();
+
+  const { user, signInWithGoogle, signInWithEmailAndPassword } = useAuth();
+
+  const [name, setName] = useState<string>("");
+
+  const [email, setEmail] = useState<string>("");
+
+  const [password, setPassword] = useState<string>("");
+
   const [showNavbar, setShowNavbar] = useState<boolean>(true);
+
+  const [popup, setPopup] = useState<"" | "login-form" | "register-form">("");
 
   const [y, setY] = useState(window.scrollY);
 
@@ -21,9 +35,138 @@ const Index = () => {
     });
 
   }, [y]);
-  
+
   return (
     <>
+      {popup !== "" && (
+        <div className="fixed z-50 flex items-center justify-center top-0 left-0 h-screen w-screen bg-black bg-opacity-70">
+          <Outclick callback={() => setPopup("")}>
+            <div data-aos="fade-down" data-aos-duration="1000" className="bg-white p-4 sm:p-8 w-full" style={{ maxWidth: "750px" }}>
+              {
+                {
+                  "login-form": (
+                    <div>
+                      <h2 className="text-2xl text-barbina-brown mb-3">
+                        Entrar
+                      </h2>
+                      <div className="flex my-5 items-center justify-center">
+                        <span className="absolute text-gray-500 bg-white text-sm px-2">Redes sociais</span>
+                        <hr className="w-full" />
+                      </div>
+                      <div className="w-full py-2 flex justify-center">
+                        <button onClick={signInWithGoogle} type="button" className="flex items-center text-lg gap-2 bg-red-500 hover:bg-red-700 px-4 py-2 text-white">
+                          <CgGoogle />
+                          Entrar com o google
+                        </button>
+                      </div>
+                      <div className="flex my-5 items-center justify-center">
+                        <span className="absolute text-gray-500 bg-white text-sm px-2">ou</span>
+                        <hr className="w-full" />
+                      </div>
+                      <form onClick={e => { e.preventDefault(); signInWithEmailAndPassword(name, email, password) }}>
+                        <div className="w-full my-2">
+                          <label className="text-gray-600" htmlFor="name">
+                            Email:
+                          </label>
+                          <div className="bg-white flex border border-gray-200 rounded">
+                            <input
+                              value={email}
+                              onChange={e => setEmail(e.target.value)}
+                              name="email"
+                              placeholder="Email"
+                              type="email"
+                              className="p-1 px-2 appearance-none outline-none w-full text-gray-600"
+                            />
+                          </div>
+                        </div>
+                        <div className="w-full my-2">
+                          <label className="text-gray-600" htmlFor="name">
+                            Senha:
+                          </label>
+                          <div className="bg-white flex border border-gray-200 rounded">
+                            <input
+                              value={password}
+                              onChange={e => setPassword(e.target.value)}
+                              name="password"
+                              placeholder="Senha"
+                              type="password"
+                              className="p-1 px-2 appearance-none outline-none w-full text-gray-600"
+                            />
+                          </div>
+                        </div>
+                        <div className="w-full my-4">
+                          <button type="submit" className="flex items-center text-lg gap-2 bg-yellow-500 hover:bg-yellow-700 px-4 py-1 text-white">
+                            <CgLogIn />
+                            Entrar
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  ),
+                  "register-form": <div>
+                    <h2 className="text-2xl text-barbina-brown mb-3">
+                      Registrar-se
+                    </h2>
+                    <form onClick={e => { e.preventDefault(); signInWithEmailAndPassword(name, email, password) }}>
+                      <div className="w-full my-2">
+                        <label className="text-gray-600" htmlFor="name">
+                          name:
+                        </label>
+                        <div className="bg-white flex border border-gray-200 rounded">
+                          <input
+                            value={name}
+                            onChange={e => setName(e.target.value)}
+                            name="name"
+                            placeholder="Nome"
+                            type="text"
+                            className="p-1 px-2 appearance-none outline-none w-full text-gray-600"
+                          />
+                        </div>
+                      </div>
+                      <div className="w-full my-2">
+                        <label className="text-gray-600" htmlFor="name">
+                          Email:
+                        </label>
+                        <div className="bg-white flex border border-gray-200 rounded">
+                          <input
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                            name="email"
+                            placeholder="Email"
+                            type="email"
+                            className="p-1 px-2 appearance-none outline-none w-full text-gray-600"
+                          />
+                        </div>
+                      </div>
+                      <div className="w-full my-2">
+                        <label className="text-gray-600" htmlFor="name">
+                          Senha:
+                        </label>
+                        <div className="bg-white flex border border-gray-200 rounded">
+                          <input
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                            name="password"
+                            placeholder="Senha"
+                            type="password"
+                            className="p-1 px-2 appearance-none outline-none w-full text-gray-600"
+                          />
+                        </div>
+                      </div>
+                      <div className="w-full my-4">
+                        <button type="submit" className="flex items-center text-lg gap-2 bg-yellow-500 hover:bg-yellow-700 px-4 py-1 text-white">
+                          <CgLogIn />
+                          Registrar
+                        </button>
+                      </div>
+                    </form>
+                  </div>,
+                }[popup]
+              }
+            </div>
+          </Outclick>
+        </div>
+      )}
       <nav className={`w-full`}>
         <div className="w-full flex justify-between px-6 py-2">
           <div data-aos="fade-down" data-aos-duration="1000" className={`${!showNavbar ? "opacity-0 " : ""}duration-500 flex items-center md:w-auto w-full order-3`}>
@@ -47,48 +190,38 @@ const Index = () => {
             htmlFor="menu-toggle"
             className="cursor-pointer text-5xl lg:hidden block order-3"
           >
-            <svg onClick={() => setShowNavbarMenu(!showNavbarMenu)} style={{color: "#ffedb4"}}
-              className={`${showNavbarMenu? "opacity-0 " : ""}duration-500 fill-current m-4 z-30 fixed lg:relative top-0 right-0`}
+            <svg onClick={() => setShowNavbarMenu(!showNavbarMenu)} style={{ color: "#ffedb4", borderColor: "#ffedb4", backgroundColor: "#4a321fee" }}
+              className={`${showNavbarMenu ? "opacity-0 " : ""}duration-500 fill-current m-4 z-30 fixed border lg:relative top-0 right-0 p-1 px-2 rounded`}
               xmlns="http://www.w3.org/2000/svg"
-              width="40"
-              height="40"
+              width="50"
+              height="50"
               viewBox="0 0 20 20"
             >
               <title>menu</title>
               <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z"></path>
             </svg>
-            <Close onClick={() => setShowNavbarMenu(!showNavbarMenu)} style={{color: "#ffedb4"}} className={`${!showNavbarMenu? "opacity-0 " : ""}duration-500 fill-current my-3 mr-3 z-30 fixed lg:relative top-0 right-0`} />
+            <Close onClick={() => setShowNavbarMenu(!showNavbarMenu)} style={{ color: "#ffedb4" }} className={`${!showNavbarMenu ? "opacity-0 " : ""}duration-500 pt-2 pr-2 fill-current my-3 mr-3 z-30 fixed lg:relative top-0 right-0`} />
           </label>
 
-          <div className={`${
-                !showNavbarMenu ? "hidde " : ""
-              }  fixed lg:relative right-0 top-0 menu-items w-full lg:w-auto text-right h-screen lg:h-auto lg:order-3 flex lg:flex-wrap justify-end lg:mr-4`}>
-            <div
-              className={`w-full items-menu-display lg:block flex-grow lg:flex lg:w-auto`}
-            >
-              <div data-aos={`${!showNavbarMenu ? "fade-down" : ""}`} data-aos-duration="1000" className={`${!showNavbarMenu ?`${!showNavbar ? "opacity-0 " : ""}duration-500 ` : ""}pt-2 lg:pt-0 text-lg mt-12`}>
-                <a
-                  href="#cardapio"
-                  className="block lg:inline-block lg:mt-0 menuOptions my-6 lg:my-0 mr-6"
-                >
+          <div className={`${!showNavbarMenu ? "hidde " : ""
+            }  fixed lg:relative right-0 top-0 menu-items w-full lg:w-auto text-right h-screen lg:h-auto lg:order-3 flex lg:flex-wrap justify-end lg:mr-4`}>
+
+            <div className={`w-full items-menu-display lg:block flex-grow lg:flex lg:w-auto`}>
+              <div data-aos={`${!showNavbarMenu ? "fade-down" : ""}`} data-aos-duration="1000" className={`${!showNavbarMenu ? `${!showNavbar ? "opacity-0 " : ""}duration-500 ` : ""}pt-2 lg:pt-0 text-lg mt-12`}>
+                <a href="#cardapio" className="block lg:inline-block lg:mt-0 menuOptions my-6 lg:my-0 mr-6">
                   Cardápio
                 </a>
                 <a
-                  href="/contato"
-                  className="block lg:inline-block lg:mt-0 menuOptions my-6 lg:my-0 mr-6"
-                >
+                  href="/contato" className="block lg:inline-block lg:mt-0 menuOptions my-6 lg:my-0 mr-6">
                   Contato
                 </a>
-                <a
-                  href="/sobre"
-                  className="block lg:inline-block lg:mt-0 menuOptions my-6 lg:my-0 mr-6"
-                >
+                <a href="/sobre" className="block lg:inline-block lg:mt-0 menuOptions my-6 lg:my-0 mr-6">
                   Sobre
                 </a>
-                <button className="duration-300 lg:inline-block bg-transparent text-yellow-300 py-1 px-4 ease-out rounded border border-yellow-300 mr-4 hover:bg-white hover:text-yellow-400">
+                <button onClick={() => setPopup("login-form")} className="duration-300 lg:inline-block bg-transparent text-yellow-300 py-1 px-4 ease-out rounded border border-yellow-300 mr-4 hover:bg-yellow-300 hover:text-barbina-brown">
                   Entrar
                 </button>
-                <button className="duration-300 mr-6 lg:mr-0 text-white lg:inline-block bg-yellow-400 py-1 px-4 ease-out rounded hover:bg-yellow-500">
+                <button onClick={() => setPopup("register-form")} className="duration-300 mr-6 lg:mr-0 text-white lg:inline-block bg-yellow-400 py-1 px-4 ease-out rounded hover:bg-yellow-500">
                   Registrar-se
                 </button>
               </div>

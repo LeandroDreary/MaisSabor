@@ -9,3 +9,50 @@ body {
 .font-ubuntu {
   font-family: Ubuntu;
 }
+
+.text-barbina-brown{
+  color: #2e160e;
+}
+
+.bg-barbina-brown{
+  background-color: #240f08;
+}
+
+.border-barbina-brown{
+  border-color: #d8cbc6;
+}
+
+.text-barbina-light-brown{
+  color: #6b4234;
+}
+
+.hover\:text-barbina-brown:hover{
+  color: #2e160e;
+}
+
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+}
+
+.rotate {
+  animation: rotation 2s infinite cubic-bezier(0.55, 0.085, 0.68, 0.53);
+}
+
+.zoom-init-anim {
+  animation-name: scale-in;
+  animation-duration: .4s;
+}
+
+@keyframes scale-in {
+  0% {
+    transform: scale(0.7);
+  }
+  100% {
+    transform: scale(1);
+    }
+}

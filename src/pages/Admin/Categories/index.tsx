@@ -1,65 +1,50 @@
 import React, { FormEvent, useState } from "react";
 import { useEffect } from "react";
-import CreateOrEditCategory from "../../../components/Forms/CreateOrEditCategory";
+import CreateOrEditCategory, { CategoryType } from "../../../components/Forms/Category/CreateOrEdit";
 import Outclick from "../../../components/Outclick";
 import { db } from "../../../services/firebase";
 import { BiTrash, BiPencil } from "react-icons/all";
 import "./index.css";
 import AdminLayout from "../../../layout/AdminLayout";
 
-type CategoryType = {
-  name: string;
-  id: string;
-};
-
 const Index = () => {
-  const [popup, setPopup] = useState<
-    "" | "create-category" | "edit-category" | "delete-category"
-  >("");
+  // The popup selected to show in the screen 
+  const [popup, setPopup] = useState<"" | "create-category" | "edit-category" | "delete-category">("");
 
   const [categories, setCategories] = useState<CategoryType[]>([]);
 
-  const [editSelectedCategory, setEditSelectedCategory] =
-    useState<CategoryType>();
+  // Variable to store the category that will be edited
+  const [editSelectedCategory, setEditSelectedCategory] = useState<CategoryType>();
 
-  const [deleteSelectedCategory, setDeleteSelectedCategory] =
-    useState<CategoryType>();
+  // Variable to store the category that will be deleted
+  const [deleteSelectedCategory, setDeleteSelectedCategory] = useState<CategoryType>();
 
   const HandleLoadCategories = async () => {
-    await db
-      .collection("categories")
-      .get()
-      .then((querySnapshot) => {
-        let myCategories: CategoryType[] = [];
-        querySnapshot.forEach((doc) => {
-          myCategories.push({ id: doc.id, name: doc.data().name });
-        });
-        setCategories(myCategories);
-      });
+
+    // Getting the categories in the database
+    await db.collection("categories").get().then(querySnapshot => {
+      let myCategories: CategoryType[] = [];
+      querySnapshot.forEach((doc) => myCategories.push({ id: doc.id, name: doc.data().name }));
+      setCategories(myCategories);
+    });
   };
 
   const HandleDeleteCategory = async (e: FormEvent) => {
     e.preventDefault();
 
-    let categoryDocRef = db
-      .collection("categories")
-      .doc(deleteSelectedCategory?.id);
+    let categoryDocRef = db.collection("categories").doc(deleteSelectedCategory?.id);
 
-    db.runTransaction((transaction) => {
-      return transaction.get(categoryDocRef).then((categoryDoc) => {
-        if (!categoryDoc.exists) {
-          throw new Error("Document does not exist!");
-        }
-        transaction.delete(categoryDocRef);
-      });
-    })
-      .then(() => {
-        HandleLoadCategories();
-        setPopup("");
-      })
-      .catch((error) => {
-        console.log("Transaction failed: ", error);
-      });
+    db.runTransaction((transaction) => transaction.get(categoryDocRef).then((categoryDoc) => {
+      // Verify if the category exist
+      if (!categoryDoc.exists) throw new Error("Document does not exist!");
+      // Deleting the category
+      transaction.delete(categoryDocRef);
+    })).then(() => {
+      HandleLoadCategories();
+      setPopup("");
+    }).catch(error => {
+      console.log("Transaction failed: ", error);
+    });
   };
 
   useEffect(() => {
@@ -68,10 +53,8 @@ const Index = () => {
 
   return (
     <>
-
-      {/* Popups */}
       {popup !== "" && (
-        <div className="fixed flex items-center justify-center top-0 left-0 h-screen w-screen bg-black bg-opacity-70">
+        <div className="fixed z-10 flex items-center justify-center top-0 left-0 h-screen w-screen bg-black bg-opacity-70">
           <Outclick
             callback={() => {
               setPopup("");
@@ -83,7 +66,8 @@ const Index = () => {
                 {
                   "create-category": (
                     <CreateOrEditCategory
-                      Submit={() => {
+                      datas={{}}
+                      callBack={() => {
                         HandleLoadCategories();
                         setPopup("");
                       }}
@@ -91,8 +75,8 @@ const Index = () => {
                   ),
                   "edit-category": (
                     <CreateOrEditCategory
-                      data={editSelectedCategory}
-                      Submit={() => {
+                      datas={{ catgory: editSelectedCategory }}
+                      callBack={() => {
                         HandleLoadCategories();
                         setPopup("");
                       }}
@@ -129,10 +113,9 @@ const Index = () => {
         </div>
       )}
 
-
       <AdminLayout>
         <div className="container mt-12 mx-auto">
-          <span className="text-2xl font-semibold font-ubuntu text-gray-700 mx-4 pr-2 add-product-title-underline">
+          <span className="text-2xl text-barbina-brown mx-4 pr-2 add-product-title-underline">
             Categorias
           </span>
           <div className="flex mx-2">
@@ -163,7 +146,7 @@ const Index = () => {
                     key={category.id}
                     className="col-span-4 sm:col-span-2 lg:col-span-1 border rounded shadow-lg bg-white p-2"
                   >
-                    <h2 className="pb-2 px-2 text-xl text-gray-600 font-semibold">
+                    <h2 className="pb-2 px-2 text-xl text-gray-600">
                       {category.name}
                     </h2>
                     <hr />
