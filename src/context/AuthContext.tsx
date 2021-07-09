@@ -75,8 +75,8 @@ export function AuthContextProvider(props: AuthContextProviderProps) {
                 // ...
             })
             .catch((error) => {
-                var errorCode = error.code;
-                var errorMessage = error.message;
+                // var errorCode = error.code;
+                // var errorMessage = error.message;
             });
 
         // if (result.user) {
@@ -94,20 +94,20 @@ export function AuthContextProvider(props: AuthContextProviderProps) {
         // }
     }
 
-    async function signInWithPassword(email: string, password: string) {
-        firebase.auth().createUserWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-                // Signed in 
-                var user = userCredential.user;
-                // ...
-            })
-            .catch((error) => {
-                var errorCode = error.code;
-                var errorMessage = error.message;
-                // ..
-            });
+    // async function signInWithPassword(email: string, password: string) {
+    //     firebase.auth().createUserWithEmailAndPassword(email, password)
+    //         .then((userCredential) => {
+    //             // Signed in 
+    //             var user = userCredential.user;
+    //             // ...
+    //         })
+    //         .catch((error) => {
+    //             var errorCode = error.code;
+    //             var errorMessage = error.message;
+    //             // ..
+    //         });
 
-    }
+    // }
 
 
     return (

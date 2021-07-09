@@ -79,8 +79,9 @@ const Index = () => {
     });
   };
 
+  HandleLoadProducts();
+
   useEffect(() => {
-    HandleLoadProducts();
     HandleLoadCategories();
   }, []);
 

@@ -9,7 +9,7 @@ import { CgGoogle, CgLogIn } from 'react-icons/all'
 const Index = () => {
   const [showNavbarMenu, setShowNavbarMenu] = useState<boolean>();
 
-  const { user, signInWithGoogle, signInWithEmailAndPassword } = useAuth();
+  const { signInWithGoogle, signInWithEmailAndPassword } = useAuth();
 
   const [name, setName] = useState<string>("");
 

@@ -55,8 +55,9 @@ const Home = () => {
     });
   };
 
+  HandleLoadProducts();
+
   useEffect(() => {
-    HandleLoadProducts();
     HandleLoadCategories();
   }, []);
 
