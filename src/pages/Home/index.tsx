@@ -108,13 +108,13 @@ const Home = () => {
         <h2 className="text-4xl text-barbina-brown font-ubuntu font-semibold my-8 text-center title-underline">
           Cardápio
         </h2>
-        <div className="mt-2 py-4 px-2 mx-2 pb-8 bg-white border rounded shadow-sm">
+        <div className="mt-2 py-4 px-2 mx-2 pb-8 bg-white border border-barbina-brown rounded-lg shadow-sm">
           <form onSubmit={e => { e.preventDefault(); HandleLoadProducts(filters) }} className="sm:flex mb-4">
-            <button type="submit" className="w-full sm:w-auto sm:mx-2 bg-yellow-400 duration-300 hover:bg-yellow-700 text-white h-10 py-2 px-6 rounded cursor-pointer">
+            <button type="submit" className="w-full sm:w-auto sm:mx-2 bg-yellow-400 duration-300 hover:bg-yellow-500 text-barbina-brown h-10 py-2 px-6 rounded cursor-pointer">
               Procurar
             </button>
-            <div className="w-full my-2 sm:my-0 sm:w-40 h-10 p-1 flex border border-gray-200 rounded">
-              <select onChange={e => setFilters({ category: e.target.value, search: filters?.search })} className="mx-2 text-gray-600 form-select w-full">
+            <div className="w-full my-2 sm:my-0 sm:w-40 h-10 p-1 flex border border-barbina-brown rounded">
+              <select onChange={e => setFilters({ category: e.target.value, search: filters?.search })} className="mx-2 text-barbina-light-brown form-select w-full">
                 <option value="">Todas</option>
                 {categories &&
                   categories.map((category) => (
@@ -125,17 +125,17 @@ const Home = () => {
               </select>
             </div>
             <div className="w-full sm:mx-2">
-              <div className="p-1 flex border border-gray-200 rounded">
+              <div className="p-1 flex border border-barbina-brown rounded">
                 <input
                   placeholder="Procurar"
                   value={filters?.search}
                   onChange={e => setFilters({ ...filters, search: e.target.value })}
-                  className="p-1 px-2 appearance-none outline-none"
+                  className="p-1 px-2 w-full text-barbina-light-brown appearance-none outline-none"
                 />
               </div>
             </div>
           </form>
-          <hr />
+          <hr className="border-barbina-brown" />
           <div className="grid grid-cols-6 content-center gap-2 px-2">
             <div className="sm:col-span-6"></div>
             {loading ? (
@@ -149,7 +149,7 @@ const Home = () => {
               :
               products.map(product => {
                 return (
-                  <Card product={product} />
+                  <Card key={product.id} product={product} />
                 )
               })
             }

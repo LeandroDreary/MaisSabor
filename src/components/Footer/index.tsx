@@ -1,15 +1,10 @@
 import React from 'react';
-import Icon from "./../../assets/images/icon.png";
 
 const Footer = () => {
     return (
-        <footer className="flex items-center justify-between flex-wrap bg-yellow-500 px-5 pt-4 pb-6 mt-6">
-            <div className="container flex items-center">
-                <a href="/" className="mx-8 text-white">
-                    <img src={Icon} className="max-h-16" alt="Icone Barbina" />
-                </a>
-            </div>
-            <p></p>
+        <footer className="flex items-center justify-center flex-wrap bg-yellow-500 text-sm px-5 py-4 mt-6">
+            <p className="text-barbina-brown">Copyright 2021 All Rights Reserved.
+                Barbina is Powered by <a target="_blank" rel="noopener noreferrer" style={{ filter: "brightness(150%)", msFilter: "brightness(150%)" }} href="https://leandroviegas.com.br">Leandro Viegas</a></p>
         </footer>
     )
 }

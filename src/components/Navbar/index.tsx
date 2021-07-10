@@ -4,12 +4,14 @@ import "./index.css";
 import Icon from "./../../assets/images/icon.png";
 import Outclick from "../Outclick";
 import { useAuth } from "../../hooks/Auth";
-import { CgGoogle, CgLogIn } from 'react-icons/all'
+import { CgGoogle, CgLogIn, FaArrowDown, BiLogOut } from 'react-icons/all'
 
 const Index = () => {
   const [showNavbarMenu, setShowNavbarMenu] = useState<boolean>();
 
-  const { signInWithGoogle, signInWithEmailAndPassword } = useAuth();
+  const { user, signInWithGoogle, signOut, signInWithEmailAndPassword, signUpWithEmailAndPassword } = useAuth();
+
+  const [displayUserDropdown, setDisplayUserDropdown] = useState<boolean>(false);
 
   const [name, setName] = useState<string>("");
 
@@ -36,6 +38,11 @@ const Index = () => {
 
   }, [y]);
 
+  useEffect(() => {
+    if (user)
+      setPopup("")
+  }, [user])
+
   return (
     <>
       {popup !== "" && (
@@ -54,7 +61,7 @@ const Index = () => {
                         <hr className="w-full" />
                       </div>
                       <div className="w-full py-2 flex justify-center">
-                        <button onClick={signInWithGoogle} type="button" className="flex items-center text-lg gap-2 bg-red-500 hover:bg-red-700 px-4 py-2 text-white">
+                        <button onClick={signInWithGoogle} type="button" className="flex items-center gap-2 bg-red-500 hover:bg-red-700 px-4 py-2 text-white">
                           <CgGoogle />
                           Entrar com o google
                         </button>
@@ -63,7 +70,7 @@ const Index = () => {
                         <span className="absolute text-gray-500 bg-white text-sm px-2">ou</span>
                         <hr className="w-full" />
                       </div>
-                      <form onClick={e => { e.preventDefault(); signInWithEmailAndPassword(name, email, password) }}>
+                      <form onClick={e => { e.preventDefault(); signInWithEmailAndPassword(email, password) }}>
                         <div className="w-full my-2">
                           <label className="text-gray-600" htmlFor="name">
                             Email:
@@ -94,10 +101,13 @@ const Index = () => {
                             />
                           </div>
                         </div>
-                        <div className="w-full my-4">
-                          <button type="submit" className="flex items-center text-lg gap-2 bg-yellow-500 hover:bg-yellow-700 px-4 py-1 text-white">
+                        <div className="w-full flex justify-between my-4">
+                          <button type="submit" className="duration-300 flex items-center text-lg gap-2 bg-yellow-500 hover:bg-yellow-700 px-4 py-1 text-white">
                             <CgLogIn />
                             Entrar
+                          </button>
+                          <button onClick={() => setPopup("register-form")} className="duration-300 text-white bg-yellow-400 py-1 px-4 ease-out rounded hover:bg-yellow-500">
+                            Registrar-se
                           </button>
                         </div>
                       </form>
@@ -107,7 +117,8 @@ const Index = () => {
                     <h2 className="text-2xl text-barbina-brown mb-3">
                       Registrar-se
                     </h2>
-                    <form onClick={e => { e.preventDefault(); signInWithEmailAndPassword(name, email, password) }}>
+                    <hr />
+                    <form onClick={e => { e.preventDefault(); signUpWithEmailAndPassword(name, email, password) }}>
                       <div className="w-full my-2">
                         <label className="text-gray-600" htmlFor="name">
                           name:
@@ -153,10 +164,13 @@ const Index = () => {
                           />
                         </div>
                       </div>
-                      <div className="w-full my-4">
-                        <button type="submit" className="flex items-center text-lg gap-2 bg-yellow-500 hover:bg-yellow-700 px-4 py-1 text-white">
+                      <div className="w-full flex justify-between my-4">
+                        <button type="submit" className="flex duration-300 items-center text-lg gap-2 bg-yellow-500 hover:bg-yellow-700 px-4 py-1 text-white">
                           <CgLogIn />
                           Registrar
+                        </button>
+                        <button onClick={() => setPopup("login-form")} className="duration-300 text-white bg-yellow-400 py-1 px-4 ease-out rounded hover:bg-yellow-500">
+                          Entrar
                         </button>
                       </div>
                     </form>
@@ -203,27 +217,54 @@ const Index = () => {
             <Close onClick={() => setShowNavbarMenu(!showNavbarMenu)} style={{ color: "#ffedb4" }} className={`${!showNavbarMenu ? "opacity-0 " : ""}duration-500 pt-2 pr-2 fill-current my-3 mr-3 z-30 fixed lg:relative top-0 right-0`} />
           </label>
 
-          <div className={`${!showNavbarMenu ? "hidde " : ""
-            }  fixed lg:relative right-0 top-0 menu-items w-full lg:w-auto text-right h-screen lg:h-auto lg:order-3 flex lg:flex-wrap justify-end lg:mr-4`}>
+          <div className={`${!showNavbarMenu ? "hidde " : ""}fixed lg:relative right-0 top-0 menu-items w-full lg:w-auto text-right h-screen lg:h-auto lg:order-3 flex lg:flex-wrap justify-end lg:mr-4`}>
 
-            <div className={`w-full items-menu-display lg:block flex-grow lg:flex lg:w-auto`}>
-              <div data-aos={`${!showNavbarMenu ? "fade-down" : ""}`} data-aos-duration="1000" className={`${!showNavbarMenu ? `${!showNavbar ? "opacity-0 " : ""}duration-500 ` : ""}pt-2 lg:pt-0 text-lg mt-12`}>
-                <a href="#cardapio" className="block lg:inline-block lg:mt-0 menuOptions my-6 lg:my-0 mr-6">
+            <div className={`w-full items-menu-display lg:block text-lg flex-grow lg:flex lg:w-auto`}>
+              <div data-aos={`${!showNavbarMenu ? "fade-down" : ""}`} data-aos-duration="1000" className={`${!showNavbarMenu ? `${!showNavbar ? "opacity-0 " : ""}duration-500 ` : ""}pt-2 lg:pt-0 mt-8`}>
+                <a href="#cardapio" className="block lg:inline-block lg:mt-0 menuOptions my-6 lg:my-0 mx-6 lg:ml-0">
                   Cardápio
                 </a>
                 <a
-                  href="/contato" className="block lg:inline-block lg:mt-0 menuOptions my-6 lg:my-0 mr-6">
+                  href="/contato" className="block lg:inline-block lg:mt-0 menuOptions my-6 lg:my-0 mx-6 lg:ml-0">
                   Contato
                 </a>
-                <a href="/sobre" className="block lg:inline-block lg:mt-0 menuOptions my-6 lg:my-0 mr-6">
+                <a href="/sobre" className="block lg:inline-block lg:mt-0 menuOptions my-6 lg:my-0 mx-6 lg:ml-0">
                   Sobre
                 </a>
-                <button onClick={() => setPopup("login-form")} className="duration-300 lg:inline-block bg-transparent text-yellow-300 py-1 px-4 ease-out rounded border border-yellow-300 mr-4 hover:bg-yellow-300 hover:text-barbina-brown">
-                  Entrar
-                </button>
-                <button onClick={() => setPopup("register-form")} className="duration-300 mr-6 lg:mr-0 text-white lg:inline-block bg-yellow-400 py-1 px-4 ease-out rounded hover:bg-yellow-500">
-                  Registrar-se
-                </button>
+                {
+                  user ? (<>
+                    <span className="text-right block lg:inline-block lg:mt-0 text-light-yellow my-4 lg:my-0 mr-6">
+                      <span className="flex gap-3 h-0 justify-end my-10 lg:my-0 items-center">
+                        <span className="relative">
+                          <span onClick={() => setDisplayUserDropdown(true)} className="flex items-center gap-1 menuOptions">
+                            {user.name}
+                            <FaArrowDown />
+                          </span>
+                          {
+                            displayUserDropdown && (
+                              <Outclick callback={() => setDisplayUserDropdown(false)}>
+                                <div data-aos="zoom-in" data-aos-duration="500" className="rounded-sm shadow-lg mt-2 text-barbina-brown bg-white py-1 text-sm absolute right-0">
+                                  <span onClick={() => { signOut(); setDisplayUserDropdown(false); }} className="cursor-pointer hover:bg-gray-100 px-3 flex items-center gap-1">Logout<BiLogOut /></span>
+                                </div>
+                              </Outclick>
+                            )
+                          }
+
+                        </span>
+                        <img className="h-10 rounded-full w-10" src={user.avatar} alt={user.name} />
+                      </span>
+                    </span>
+
+                  </>) : (<>
+                    <button onClick={() => setPopup("login-form")} className="duration-300 lg:inline-block bg-transparent text-yellow-300 py-1 px-4 ease-out rounded border border-yellow-300 mr-4 hover:bg-yellow-300 hover:text-barbina-brown">
+                      Entrar
+                    </button>
+                    <button onClick={() => setPopup("register-form")} className="duration-300 mr-6 lg:mr-0 text-white lg:inline-block bg-yellow-400 py-1 px-4 ease-out rounded hover:bg-yellow-500">
+                      Registrar-se
+                    </button>
+                  </>)
+                }
+
               </div>
             </div>
           </div>

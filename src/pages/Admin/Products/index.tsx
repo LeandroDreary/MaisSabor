@@ -191,7 +191,7 @@ const Index = () => {
                 products.map(product => {
                   return (
                     <Card product={product}>
-                      <hr className="border-barbina-brown" />
+                      <hr className="border-barbina-light-brown" />
                       <div className="pt-2">
                         <div className="inline-block">
                           <Link to={`/admin/products/edit/${product.id}`}>

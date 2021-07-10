@@ -9,8 +9,10 @@ type User = {
 
 type AuthContextType = {
     user: User | undefined;
+    signOut: () => Promise<void>;
     signInWithGoogle: () => Promise<void>;
-    signInWithEmailAndPassword: (name: string, email: string, password: string) => Promise<void>;
+    signInWithEmailAndPassword: (email: string, password: string) => Promise<void>;
+    signUpWithEmailAndPassword: (name: string, email: string, password: string) => Promise<void>;
 }
 
 export const AuthContext = createContext({} as AuthContextType);
@@ -63,55 +65,51 @@ export function AuthContextProvider(props: AuthContextProviderProps) {
         }
     }
 
-    async function signInWithEmailAndPassword(name: string, email: string, password: string) {
+    async function signUpWithEmailAndPassword(name: string, email: string, password: string) {
+        // Register user
         firebase.auth().createUserWithEmailAndPassword(email, password)
-            .then(async (userCredential) => {
-                // Signed in
-                await userCredential.user?.updateProfile({
-                    displayName: name
-                })
-                
-                console.log(userCredential.user)
-                // ...
+            .then(async userCredential => {
+                // Registered
+                await userCredential.user?.updateProfile({ displayName: name })
+
+                // Save informations
+                if (userCredential.user) {
+                    const { uid, displayName, photoURL } = userCredential.user
+
+                    setUser({
+                        id: uid,
+                        name: displayName || name,
+                        avatar: photoURL || ""
+                    })
+                }
             })
-            .catch((error) => {
-                // var errorCode = error.code;
-                // var errorMessage = error.message;
-            });
-
-        // if (result.user) {
-        //     const { displayName, photoURL, uid } = result.user
-
-        //     if (!displayName) {
-        //         throw new Error("Missing informations from Google Account.");
-        //     }
-
-        //     setUser({
-        //         id: uid,
-        //         name: displayName,
-        //         avatar: photoURL || ""
-        //     })
-        // }
     }
 
-    // async function signInWithPassword(email: string, password: string) {
-    //     firebase.auth().createUserWithEmailAndPassword(email, password)
-    //         .then((userCredential) => {
-    //             // Signed in 
-    //             var user = userCredential.user;
-    //             // ...
-    //         })
-    //         .catch((error) => {
-    //             var errorCode = error.code;
-    //             var errorMessage = error.message;
-    //             // ..
-    //         });
+    async function signInWithEmailAndPassword(email: string, password: string) {
+        const result = await firebase.auth().createUserWithEmailAndPassword(email, password)
 
-    // }
+        if (result.user) {
+            const { displayName, photoURL, uid } = result.user
 
+            if (!displayName) {
+                throw new Error("Missing informations from your Account.");
+            }
+
+            setUser({
+                id: uid,
+                name: displayName,
+                avatar: photoURL || ""
+            })
+        }
+    }
+
+    async function signOut() {
+        await firebase.auth().signOut();
+        setUser(undefined)
+    }
 
     return (
-        <AuthContext.Provider value={{ user, signInWithGoogle, signInWithEmailAndPassword }}>
+        <AuthContext.Provider value={{ user, signInWithGoogle, signUpWithEmailAndPassword, signInWithEmailAndPassword, signOut }}>
             {props.children}
         </AuthContext.Provider>
     );
