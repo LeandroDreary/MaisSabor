@@ -221,7 +221,7 @@ const Index = () => {
 
             <div className={`w-full items-menu-display lg:block text-lg flex-grow lg:flex lg:w-auto`}>
               <div data-aos={`${!showNavbarMenu ? "fade-down" : ""}`} data-aos-duration="1000" className={`${!showNavbarMenu ? `${!showNavbar ? "opacity-0 " : ""}duration-500 ` : ""}pt-2 lg:pt-0 mt-8`}>
-                <a href="#cardapio" className="block lg:inline-block lg:mt-0 menuOptions my-6 lg:my-0 mx-6 lg:ml-0">
+                <a href="/#cardapio" className="block lg:inline-block lg:mt-0 menuOptions my-6 lg:my-0 mx-6 lg:ml-0">
                   Cardápio
                 </a>
                 <a

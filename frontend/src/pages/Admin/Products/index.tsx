@@ -8,7 +8,7 @@ import Outclick from "../../../components/Outclick";
 import AdminLayout from "../../../layout/AdminLayout";
 import { db } from "../../../services/firebase";
 import "./index.css"
-import { VscLoading as LoadingIcon, IoMdSad } from "react-icons/all";
+import { VscLoading, IoMdSad } from "react-icons/all";
 
 const Index = () => {
   // The popup selected to show in the screen 
@@ -24,65 +24,51 @@ const Index = () => {
 
   const HandleLoadProducts = async (filters: { category?: string, search?: string } | undefined) => {
     setLoading(true);
-    // Get the products in the database
-    (filters?.category ?
-      // If the category is selected, will execute the where condition
-      db.collection("products").where("category", "==", filters?.category) :
-      db.collection("products")
-    ).get().then(querySnapshot => {
-      let myProducts: ProductType[] = [];
-      querySnapshot.forEach(doc => {
-        // Search filter
-        if (
-          String(doc.data()?.name || "").toLowerCase().includes(filters?.search || "") ||
-          String(doc.data()?.description || "").toLowerCase().includes(filters?.search || "")
-        )
-          myProducts.push({ id: doc.id, ...doc.data() })
-      });
-      setProducts(myProducts);
-    }).catch((error) => {
-      console.log("Error getting documents: ", error);
-    }).finally(() => {
-      setLoading(false);
-    });
+    try {
+      // Get the products in the database
+      let myProducts = (await db.collection("products").get()).docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter((product: ProductType) => {
+          // If product category is the same in the filter
+          if (!filters?.category || product.category === filters?.category) {
+            // Look for the keywords in the product name
+            if ((product?.name || "").toLowerCase().includes((filters?.search || "").toLowerCase()))
+              return true
+            // Look for the keywords in the product description 
+            if ((product?.description || "").toLowerCase().includes((filters?.search || "").toLowerCase()))
+              return true
+          }
+          return false
+        })
+      setProducts(myProducts)
+    } finally {
+      setLoading(false)
+    }
   };
 
   const [categories, setCategories] = useState<CategoryType[]>([]);
 
   const HandleLoadCategories = async () => {
     // Load the categories that will show in the category select input
-    await db.collection("categories").get().then((querySnapshot) => {
-      let myCategories: CategoryType[] = [];
-      querySnapshot.forEach(doc => myCategories.push({ id: doc.id, name: doc.data().name }));
-      setCategories(myCategories);
-    });
+    let myCategories = (await db.collection('categories').get()).docs.map(doc => ({ id: doc.id, name: doc.data()?.name || "" }))
+    setCategories(myCategories)
   };
 
 
   const HandleDeleteProduct = async (e: FormEvent) => {
     e.preventDefault();
 
-    let productDocRef = db.collection("products").doc(deleteSelectedProduct?.id);
-
-    db.runTransaction((transaction) => {
-      return transaction.get(productDocRef).then(productDoc => {
-        // Verify if the product exist
-        if (!productDoc.exists) throw new Error("Document does not exist!");
-        // Deleting the product
-        transaction.delete(productDocRef);
-      });
-    }).then(() => {
+    db.doc(`/products/${deleteSelectedProduct?.id}`).delete().then(() => {
       HandleLoadProducts({});
       setPopup("");
     }).catch(error => {
       console.log("Transaction failed: ", error);
-    });
+    })
   };
 
 
   useEffect(() => {
-  HandleLoadProducts({});
-  HandleLoadCategories();
+    HandleLoadProducts({});
+    HandleLoadCategories();
   }, []);
 
   return (
@@ -111,14 +97,10 @@ const Index = () => {
                       </h2>
                       <hr />
                       <p className="text-md pt-4 text-gray-700">
-                        Deseja apagar o produto "{deleteSelectedProduct?.name}"
-                        permanentemente?
+                        Deseja apagar o produto "{deleteSelectedProduct?.name}" permanentemente?
                       </p>
                       <hr className="my-4" />
-                      <button
-                        className="mx-2 text-white h-10 hover:bg-red-700 bg-red-500 py-2 px-6 rounded cursor-pointer"
-                        type="submit"
-                      >
+                      <button className="mx-2 text-white h-10 hover:bg-red-700 bg-red-500 py-2 px-6 rounded cursor-pointer" type="submit">
                         Apagar {deleteSelectedProduct?.name}
                       </button>
                     </form>
@@ -180,17 +162,17 @@ const Index = () => {
             <hr />
             <div className="grid grid-cols-4 gap-2 p-2">
               {loading ? (
-                <span className="col-span-4 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">Carregando
-                  <LoadingIcon className="rotate" />
+                <span className="col-span-4 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">
+                  Carregando <VscLoading className="rotate" />
                 </span>
-              ) : !products || products?.length <= 0 ?
-                <span className="col-span-4 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">Sem resultados encontrados
-                  <IoMdSad />
+              ) : !products ?
+                <span className="col-span-4 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">
+                  Sem resultados encontrados <IoMdSad />
                 </span>
                 :
                 products.map(product => {
                   return (
-                    <Card product={product}>
+                    <Card key={product.id} product={product}>
                       <hr className="border-barbina-light-brown" />
                       <div className="pt-2">
                         <div className="inline-block">

@@ -136,14 +136,14 @@ const Home = () => {
             </div>
           </form>
           <hr className="border-barbina-brown" />
-          <div className="grid grid-cols-6 content-center gap-2 px-2">
-            <div className="sm:col-span-6"></div>
+          <div className="grid grid-cols-5 content-center gap-2 px-2">
+            <div className="sm:col-span-5"></div>
             {loading ? (
-              <span className="col-span-6 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">Carregando
+              <span className="col-span-5 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">Carregando
                 <LoadingIcon className="rotate" />
               </span>
             ) : !products || products?.length <= 0 ?
-              <span className="col-span-6 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">Sem resultados encontrados
+              <span className="col-span-5 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">Sem resultados encontrados
                 <IoMdSad />
               </span>
               :

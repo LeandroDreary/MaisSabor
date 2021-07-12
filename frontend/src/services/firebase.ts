@@ -12,7 +12,7 @@ firebase.initializeApp({
     appId: process.env.REACT_APP_APP_ID
 });
 
-
+console.log(process.env)
   
 const auth = firebase.auth();
 
