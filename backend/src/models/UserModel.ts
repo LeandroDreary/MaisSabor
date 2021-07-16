@@ -1,19 +1,12 @@
-import mongoose, { Schema } from "mongoose";
-import { UserSchemaT } from "../entities/User";
-
-
-let UserSchema = new Schema({
-  username: { type: String, unique: true },
-  image: { type: String },
-  password: { type: String },
-  link: { type: String, unique: true },
-});
+import mongoose from "mongoose";
+import { UserModelT } from "../Entities/User";
+import { UserSchema } from "../Schemas/UserSchema";
 
 export let UserModel = () => {
   try {
-    return mongoose.model<UserSchemaT>("users");
+    return mongoose.model<UserModelT>("users");
   } catch (error) {
-    return mongoose.model<UserSchemaT>("users", UserSchema);
+    return mongoose.model<UserModelT>("users", UserSchema);
   }
 };
 

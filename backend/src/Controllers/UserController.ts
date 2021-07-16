@@ -1,39 +1,51 @@
 import { Request, Response } from "express";
-import UserEntity from "../entities/User";
-import { User } from "../models/UserModel";
+import { ObjectID } from "mongodb";
+import UserEntity from "../Entities/User";
+import { User } from "../Models/UserModel";
 import DbConnect from "../utils/dbConnect";
 
 class UserController {
   async get(request: Request, response: Response) {
-    const { id } = request.query;
+    const { _id } = request.query;
+
+    // Connect to the database
     await DbConnect();
 
-    new UserEntity({
-      username: "",
-      image: "",
-      password: "",
-      link: "",
-    });
+    // Verify if the data is valid
+    if (typeof _id === "string") {
+      const user = await User.findOne(new ObjectID(_id)).exec()
+      // Verifiy if found the user
+      if (user)
+        return response.send({ user: user.toJSON() });
+      else
+        throw new Error("users/not-found")
+    }
 
-    new User();
-
-    return response.send({ bom: "dia" });
+    throw new Error("users/invalid-informations")
   }
 
   async post(request: Request, response: Response) {
-    const { username, password, link } = request.body;
+    const { username, password, email } = request.body;
+
+    // Connect to the database
     await DbConnect();
 
     const user = new UserEntity({
       username,
       password,
-      link,
+      email
     });
 
+    // Validating the informations
+    await user.validate()
+
+    // Creating the schema
     const postUser = new User(user);
 
-    postUser.save();
+    // Saving the informations
+    await postUser.save();
 
+    // Return the data
     return response.send({ user: postUser.toJSON() });
   }
 }
