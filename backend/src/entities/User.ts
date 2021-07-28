@@ -16,20 +16,20 @@ class UserEntity {
   readonly username: string;
 
   readonly email: string;
-  
+
   readonly profilePicture?: string;
-  
+
   readonly password: string;
-  
+
   // Validation function
-  async validate(){
+  async validate() {
     // Connect to the database
     await dbConnect()
 
     // Verify if the username is already in use
-    if(!this._id)
-      if((await User.find({username: this.username}).exec()).length > 0)
-        throw new Error("user/username-already-exist")    
+    if (!this._id)
+      if ((await User.find({ _id: { $ne: this._id }, username: this.username }).exec()).length > 0)
+        throw new Error("users/username-already-exist")
   }
 
   constructor({ _id, username, email, profilePicture, password }: UserModelT) {

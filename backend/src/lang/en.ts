@@ -4,12 +4,12 @@ export default {
         message: "User not found.",
         status: 404
     },
-    "user/username-already-exist": {
+    "users/username-already-exist": {
         message: "Username is already in use.",
         status: 400
     },
-    "User/invalid-informations": {
-        message: "Insuficient or invalid informations.",
+    "users/invalid-informations": {
+        message: "Insufficient or invalid informations.",
         status: 400
     },
 
@@ -19,7 +19,7 @@ export default {
         status: 404
     },
     "category/invalid-informations": {
-        message: "Insuficient or invalid informations.",
+        message: "Insufficient or invalid informations.",
         status: 400
     },
     "category/invalid-name-length": {

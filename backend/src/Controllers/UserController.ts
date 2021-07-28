@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { ObjectID } from "mongodb";
-import UserEntity from "../Entities/User";
-import { User } from "../Models/UserModel";
-import DbConnect from "../utils/dbConnect";
+import ConvertId from "../utils/ConvertId";
+import UserEntity from "./../Entities/User";
+import { User } from "./../Models/UserModel";
+import DbConnect from "./../utils/dbConnect";
 
 class UserController {
   async get(request: Request, response: Response) {
@@ -13,7 +14,8 @@ class UserController {
 
     // Verify if the data is valid
     if (typeof _id === "string") {
-      const user = await User.findOne(new ObjectID(_id)).exec()
+      const user = await User.findOne(ConvertId(_id)).exec()
+      
       // Verifiy if found the user
       if (user)
         return response.send({ user: user.toJSON() });
