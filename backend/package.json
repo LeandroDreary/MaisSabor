@@ -1,7 +1,7 @@
 {
   "name": "barbina-backend",
   "version": "1.2.1",
-  "main": "src/server.js",
+  "main": "src/server.ts",
   "homepage": "/",
   "license": "MIT",
   "scripts": {

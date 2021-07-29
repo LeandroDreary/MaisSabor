@@ -31,7 +31,7 @@ app.use(
 );
 
 
-module.exports.handler = serverless(app);
-// app.listen("3333", () => {
-//   console.log("Server is running.");
-// });
+// module.exports.handler = serverless(app);
+app.listen("3333", () => {
+  console.log("Server is running.");
+});
