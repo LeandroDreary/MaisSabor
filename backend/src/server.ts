@@ -1,7 +1,9 @@
-import express, { NextFunction, Request, Response } from "express";
-import "express-async-errors";
+'use strict';
+import express, { NextFunction, Request, Response } from "express"
+import "express-async-errors"
 import { GetError } from "./lang/index"
-import { router } from "./routes";
+import { router } from "./routes"
+import serverless from "serverless-http"
 
 const app = express();
 
@@ -28,6 +30,8 @@ app.use(
   }
 );
 
-app.listen("3333", () => {
-  console.log("Server is running.");
-});
+
+module.exports.handler = serverless(app);
+// app.listen("3333", () => {
+//   console.log("Server is running.");
+// });
