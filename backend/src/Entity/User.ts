@@ -1,5 +1,5 @@
 import { Schema } from "mongoose";
-import { User } from "../Models1/UserModel";
+import { User } from "../Model/UserModel";
 import dbConnect from "../utils/dbConnect";
 
 export type UserModelT = {

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { CategoryModelT } from "../Entities1/Category";
+import { CategoryModelT } from "../Entity/Category";
 import { CategorySchema } from "../Schemas/CategorySchema";
 
 export let CategoryModel = () => {

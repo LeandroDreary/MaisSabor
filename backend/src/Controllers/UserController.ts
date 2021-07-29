@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
-import { ObjectID } from "mongodb";
 import ConvertId from "../utils/ConvertId";
-import UserEntity from "../Entities1/User";
-import { User } from "./../Models1/UserModel";
+import UserEntity from "../Entity/User";
+import { User } from "../Model/UserModel";
 import DbConnect from "./../utils/dbConnect";
 
 class UserController {
