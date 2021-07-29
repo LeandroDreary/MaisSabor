@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import CategoryEntity from "../Entities/Category";
-import { Category } from "../Models/CategoryModel";
+import { Category } from "../Models1/CategoryModel";
 import ConvertId from "../utils/ConvertId";
 import DbConnect from "../utils/dbConnect";
 
