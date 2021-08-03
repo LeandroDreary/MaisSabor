@@ -6,7 +6,7 @@ import DbConnect from "../utils/dbConnect";
 
 class CategoryController {
     async query(request: Request, response: Response) {
-        let {  } = request.query;
+        let { } = request.query;
 
         // Connect to the database
         await DbConnect();
@@ -97,12 +97,15 @@ class CategoryController {
         if (typeof _id !== 'string')
             throw new Error("category/invalid-informations")
 
-        // tje function "ConvertId" also verify if the id is valid
+        // The function "ConvertId" also verify if the id is valid
         const category = await Category.findOne(ConvertId(_id)).exec()
 
         // Verifiy if found the category
         if (!category)
-            throw new Error("category/not-found")
+            throw new Error("category/not-found");
+
+        // Verifiy if category can be deleted
+        (new CategoryEntity({ _id, name: "..." })).applyToDelete()
 
         // Removing the category
         await category.remove()

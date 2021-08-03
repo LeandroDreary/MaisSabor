@@ -8,6 +8,7 @@ export type UserModelT = {
   email: string;
   profilePicture?: string;
   password: string;
+  link: string;
 };
 
 class UserEntity {
@@ -19,23 +20,31 @@ class UserEntity {
 
   readonly profilePicture?: string;
 
-  readonly password: string;
+  readonly link: string;
+
+  password: string;
 
   // Validation function
   async validate() {
     // Connect to the database
     await dbConnect()
 
-    // Verify if the username is already in use
-    if (!this._id)
+    if (!this._id) {
+      // Verify if the username is already in use
       if ((await User.find({ _id: { $ne: this._id }, username: this.username }).exec()).length > 0)
         throw new Error("users/username-already-exist")
+
+      // Verify if the email is already in use
+      if ((await User.find({ _id: { $ne: this._id }, email: this.email }).exec()).length > 0)
+        throw new Error("users/email-already-exist")
+    }
   }
 
-  constructor({ _id, username, email, profilePicture, password }: UserModelT) {
+  constructor({ _id, username, email, profilePicture, password, link }: UserModelT) {
     this._id = _id;
     this.email = email;
     this.username = username;
+    this.link = link;
     this.profilePicture = profilePicture;
     this.password = password;
   }

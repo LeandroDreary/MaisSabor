@@ -7,6 +7,5 @@ export const GetError = (lang: string | undefined, errorCode: string) => {
             return ptBR[errorCode]
         default:
             return en[errorCode]
-
     }
 }

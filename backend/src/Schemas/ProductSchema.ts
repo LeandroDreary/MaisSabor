@@ -1,6 +1,6 @@
 import { Schema } from "mongoose";
 
-export let UserSchema = new Schema({
+export let ProductSchema = new Schema({
     name: { type: String },
     description: { type: String },
     category: { type: Schema.Types.ObjectId },
