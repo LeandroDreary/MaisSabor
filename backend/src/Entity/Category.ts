@@ -1,14 +1,13 @@
-import { Schema } from "mongoose";
+import { Types } from "mongoose";
 import { Product } from "../Model/ProductModel";
-import ConvertId from "../utils/ConvertId";
 
 export type CategoryModelT = {
-    _id?: Schema.Types.ObjectId;
+    _id?: Types.ObjectId;
     name: string;
 };
 
 class CategoryEntity {
-    readonly _id?: Schema.Types.ObjectId;
+    readonly _id?: Types.ObjectId;
 
     readonly name: string;
 
@@ -24,7 +23,7 @@ class CategoryEntity {
         if (name.length < 3)
             throw new Error("category/invalid-name-length")
         if (_id)
-            this._id = ConvertId(_id);
+            this._id = Types.ObjectId(_id);
 
         this.name = name;
     }

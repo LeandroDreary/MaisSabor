@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { hash } from "bcryptjs";
-import ConvertId from "../utils/ConvertId";
 import UserEntity from "../Entity/User";
 import { User } from "../Model/UserModel";
 import DbConnect from "./../utils/dbConnect";
@@ -27,7 +26,7 @@ class UserController {
 
     // Verify if the data is valid
     if (typeof _id === "string") {
-      const user = await User.findOne(ConvertId(_id)).exec()
+      const user = await User.findById(_id).exec()
 
       // Verifiy if found the user
       if (user)
@@ -109,7 +108,7 @@ class UserController {
       throw new Error("user/invalid-informations")
 
     // tje function "ConvertId" also verify if the id is valid
-    const user = await User.findOne(ConvertId(_id)).exec()
+    const user = await User.findById(_id).exec()
 
     // Verifiy if found the user
     if (!user)

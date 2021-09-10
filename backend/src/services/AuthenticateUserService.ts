@@ -1,6 +1,7 @@
 import { compare } from "bcryptjs";
 import { sign } from "jsonwebtoken";
 import { User } from "../Model/UserModel";
+import dbConnect from "../utils/dbConnect";
 
 interface IAuthenticateRequest {
     username: string;
@@ -10,16 +11,20 @@ interface IAuthenticateRequest {
 
 class AuthenticateUserService {
     async execute({ username, email, password }: IAuthenticateRequest) {
-        if ((!username && !email) || !password) throw new Error("Email/Password incorrect.");
+        if ((!username && !email) || !password) throw new Error("authentication/email-password-incorrect");
+
+        // Connecting to the database
+        await dbConnect()
+
         let user = await User.findOne({
             email
         }).exec();
 
-        if (!user) throw new Error("Email/Password incorrect.");
+        if (!user) throw new Error("authentication/email-password-incorrect");
 
         const passwordMatch = await compare(password, user.password);
 
-        if (!passwordMatch) throw new Error("Email/Password incorrect.");
+        if (!passwordMatch) throw new Error("authentication/email-password-incorrect");
 
         const token = sign(
             { email: user.email },

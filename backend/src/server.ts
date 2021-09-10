@@ -1,9 +1,24 @@
-import express, { NextFunction, Request, Response } from "express"
 import "express-async-errors"
+import express, { NextFunction, Request, Response } from "express"
 import { GetError } from "./lang/index"
 import { router } from "./routes"
+import cors from 'cors'
 
 const app = express();
+
+app.use(
+  cors({
+    origin:
+      process.env.NODE_ENV !== "production"
+        ? ["http://localhost:3000"]
+        : [
+            "https://valoriza.vercel.app",
+            "https://valoriza.leandroviegas.com.br",
+          ],
+    credentials: true,
+    optionsSuccessStatus: 200,
+  })
+);
 
 app.use(express.json());
 

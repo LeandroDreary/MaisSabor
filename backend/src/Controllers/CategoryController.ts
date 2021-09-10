@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import CategoryEntity from "../Entity/Category";
 import { Category } from "../Model/CategoryModel";
-import ConvertId from "../utils/ConvertId";
 import DbConnect from "../utils/dbConnect";
 
 class CategoryController {
@@ -27,7 +26,7 @@ class CategoryController {
         if (typeof _id !== 'string')
             throw new Error("category/invalid-informations")
 
-        const category = await Category.findOne(ConvertId(_id)).exec()
+        const category = await Category.findById(_id).exec()
 
         // Verifiy if found the category
         if (!category)
@@ -39,7 +38,7 @@ class CategoryController {
 
     async post(request: Request, response: Response) {
         const { name } = request.body;
-
+        console.log(name)
         // Connect to the database
         await DbConnect();
 
@@ -62,27 +61,27 @@ class CategoryController {
 
         // Connect to the database
         await DbConnect();
-
+        console.log(_id)
         // If is _id string
         if (typeof _id !== 'string')
             throw new Error("category/invalid-informations")
 
-        // tje function "ConvertId" also verify if the id is valid
-        const category = await Category.findOne(ConvertId(_id)).exec()
+        // Find category
+        const category = await Category.findById(_id).exec()
 
         // Verifying if found the category
         if (!category)
             throw new Error("category/not-found")
 
         // Creating an entity to validate the fields values
-        const categoryEntity = new CategoryEntity({ _id: category._id, name })
+        const categoryEntity = new CategoryEntity({ name })
 
         // Updating the fields
         category.set(categoryEntity)
 
         // Updating the category
         await category.save();
-
+        
         // Return the data
         return response.send({ category: category.toJSON() });
     }
@@ -98,15 +97,15 @@ class CategoryController {
             throw new Error("category/invalid-informations")
 
         // The function "ConvertId" also verify if the id is valid
-        const category = await Category.findOne(ConvertId(_id)).exec()
+        const category = await Category.findById(_id).exec()
 
         // Verifiy if found the category
         if (!category)
             throw new Error("category/not-found");
 
         // Verifiy if category can be deleted
-        (new CategoryEntity({ _id, name: "..." })).applyToDelete()
-
+        await (new CategoryEntity({ _id, name: "..." })).applyToDelete()
+        
         // Removing the category
         await category.remove()
 

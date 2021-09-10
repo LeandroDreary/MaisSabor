@@ -6,7 +6,7 @@ import { CategoryType } from "../../../components/Forms/Category/CreateOrEdit";
 import { ProductType } from "../../../components/Forms/Product/CreateOrEdit";
 import Outclick from "../../../components/Outclick";
 import AdminLayout from "../../../layout/AdminLayout";
-import { db } from "../../../services/firebase";
+import api, { authorization } from "../../../services/api";
 import "./index.css"
 import { VscLoading, IoMdSad } from "react-icons/all";
 
@@ -14,54 +14,66 @@ const Index = () => {
   // The popup selected to show in the screen 
   const [popup, setPopup] = useState<"" | "delete-product">("");
 
+
+  // Store ocurred errors when send data to api 
+  const [errors, setErrors] = useState<{ code?: string, message: string, showIn: string }[]>();
+  const [loading, setLoading] = useState<boolean>(true);
   const [deleteSelectedProduct, setDeleteSelectedProduct] = useState<ProductType>();
 
+
+  const [categories, setCategories] = useState<CategoryType[]>([]);
   const [products, setProducts] = useState<ProductType[]>();
 
+
+  // Search filter
   const [filters, setFilters] = useState<{ category?: string, search?: string }>()
 
-  const [loading, setLoading] = useState<boolean>(true);
 
   const HandleLoadProducts = async (filters: { category?: string, search?: string } | undefined) => {
     setLoading(true);
     try {
       // Get the products in the database
-      let myProducts = (await db.collection("products").get()).docs.map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter((product: ProductType) => {
-          // If product category is the same in the filter
-          if (!filters?.category || product.category === filters?.category) {
-            // Look for the keywords in the product name
-            if ((product?.name || "").toLowerCase().includes((filters?.search || "").toLowerCase()))
-              return true
-            // Look for the keywords in the product description 
-            if ((product?.description || "").toLowerCase().includes((filters?.search || "").toLowerCase()))
-              return true
-          }
-          return false
-        })
-      setProducts(myProducts)
+      await api.get("/products/list").then(response => {
+        setProducts(response.data.products)
+      }).catch(error => {
+        console.error(error.response.data)
+        if (error.response.data.message)
+          setErrors([{ ...error.response.data, showIn: "load" }])
+        else
+          setErrors([{ message: "Ocorreu um erro desconhecido ao carregar produtos.", showIn: "load" }])
+      })
     } finally {
       setLoading(false)
     }
   };
 
-  const [categories, setCategories] = useState<CategoryType[]>([]);
+
 
   const HandleLoadCategories = async () => {
-    // Load the categories that will show in the category select input
-    let myCategories = (await db.collection('categories').get()).docs.map(doc => ({ id: doc.id, name: doc.data()?.name || "" }))
-    setCategories(myCategories)
+    // Getting the categories in the database
+    await api.get("/categories/list").then(response => {
+      setCategories(response.data.categories)
+    }).catch(error => {
+      console.error(error.response.data)
+      if (error.response.data.message)
+        setErrors([{ ...error.response.data, showIn: "load" }])
+      else
+        setErrors([{ message: "Ocorreu um erro desconhecido ao carregar categorias.", showIn: "load" }])
+    })
   };
 
 
   const HandleDeleteProduct = async (e: FormEvent) => {
     e.preventDefault();
-
-    db.doc(`/products/${deleteSelectedProduct?.id}`).delete().then(() => {
+    await api.delete(`/products?_id=${deleteSelectedProduct?._id}`, { headers: { authorization } }).then(() => {
       HandleLoadProducts({});
-      setPopup("");
+      setPopup("")
     }).catch(error => {
-      console.log("Transaction failed: ", error);
+      console.error(error.response.data)
+      if (error.response.data.message)
+        setErrors([{ ...error.response.data, showIn: "delete" }])
+      else
+        setErrors([{ message: "Ocorreu um erro desconhecido.", showIn: "delete" }])
     })
   };
 
@@ -74,11 +86,12 @@ const Index = () => {
   return (
     <>
       {popup !== "" && (
-        <div className="fixed z-50 flex items-center justify-center top-0 left-0 h-screen w-screen bg-black bg-opacity-70">
+        <div style={{ zIndex: 80 }} className="fixed flex items-center justify-center top-0 left-0 h-screen w-screen bg-black bg-opacity-70">
           <Outclick
             callback={() => {
               setPopup("");
               setDeleteSelectedProduct(undefined);
+              setErrors([])
             }}
           >
             <div>
@@ -95,6 +108,14 @@ const Index = () => {
                       <h2 className="text-2xl font-semibold text-gray-700">
                         Apagar {deleteSelectedProduct?.name}
                       </h2>
+                      {
+                        errors &&
+                        <div className="pb-2">
+                          {errors.filter(error => error.showIn === 'delete').map(error =>
+                            <p className="bg-red-50 text-red-500 px-2 py-1 border-red-600 border rounded my-2">{error.message}</p>
+                          )}
+                        </div>
+                      }
                       <hr />
                       <p className="text-md pt-4 text-gray-700">
                         Deseja apagar o produto "{deleteSelectedProduct?.name}" permanentemente?
@@ -123,15 +144,21 @@ const Index = () => {
                 Novo Produto
               </button>
             </Link>
-
             <button
               onClick={() => HandleLoadProducts(filters)}
               className="bg-yellow-500 ease-out duration-300 hover:bg-yellow-700 flex items-center gap-1 text-white py-1 mx-2 my-4 px-3 rounded cursor-pointer">
               Atualizar
             </button>
           </div>
+          {
+            errors &&
+            <div className="pb-2">
+              {errors.filter(error => error.showIn === 'load').map(error =>
+                <p className="bg-red-50 text-red-500 px-2 py-1 border-red-600 border rounded my-2">{error.message}</p>
+              )}
+            </div>
+          }
           <hr />
-
           <div className="mt-2 py-4 px-2 mx-2 pb-8 bg-white border rounded shadow-sm">
             <form onSubmit={e => { e.preventDefault(); HandleLoadProducts(filters) }} className="flex mb-4">
               <button type="submit" className="mx-2 bg-yellow-400 duration-300 hover:bg-yellow-700 text-white h-10 py-2 px-6 rounded cursor-pointer">
@@ -142,7 +169,7 @@ const Index = () => {
                   <option value="">Todas</option>
                   {categories &&
                     categories.map((category) => (
-                      <option key={category.id} value={category.id}>
+                      <option key={category._id} value={category._id}>
                         {category.name}
                       </option>
                     ))}
@@ -172,11 +199,11 @@ const Index = () => {
                 :
                 products.map(product => {
                   return (
-                    <Card key={product.id} product={product}>
+                    <Card key={product._id} product={product}>
                       <hr className="border-barbina-light-brown" />
                       <div className="pt-2">
                         <div className="inline-block">
-                          <Link to={`/admin/products/edit/${product.id}`}>
+                          <Link to={`/admin/products/edit/${product._id}`}>
                             <button className="bg-yellow-500 ease-out duration-300 mb-2 hover:bg-yellow-700 flex items-center gap-1 text-white py-1 text-sm px-3 rounded cursor-pointer">
                               <BiPencil /> Editar
                             </button>

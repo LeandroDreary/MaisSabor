@@ -13,7 +13,7 @@ export function ensureAuthenticated(
   const authToken = request.headers.authorization;
 
   if (!authToken) {
-    return response.status(401).end();
+    throw new Error("authentication/not-logged-in")
   }
 
   const [, token] = authToken.split(" ");
@@ -24,6 +24,6 @@ export function ensureAuthenticated(
 
     return next();
   } catch (e) {
-    return response.status(401).end();
+    throw new Error("authentication/invalid-token")
   }
 }

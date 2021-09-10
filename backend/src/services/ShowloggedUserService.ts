@@ -1,11 +1,14 @@
-import { classToPlain } from "class-transformer";
 import { User } from "../Model/UserModel";
+import dbConnect from "../utils/dbConnect";
 
 class ShowloggedUserService {
     async execute(user_id){
-        const users = await User.findOne(user_id).exec();
+        // Connecting to the database
+        await dbConnect()
 
-        return classToPlain(users);
+        const users = await User.findById(user_id).select("_id username email profilePicture").exec();
+
+        return users
     }
 }
 

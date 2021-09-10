@@ -5,7 +5,7 @@ import CreateOrEditProduct, {
 import AdminLayout from "../../../../layout/AdminLayout";
 import "./index.css";
 import { useParams } from "react-router-dom";
-import { db } from "../../../../services/firebase";
+import api from "../../../../services/api";
 import { IoMdSad, VscLoading as LoadingIcon } from "react-icons/all";
 
 const Index = () => {
@@ -18,10 +18,10 @@ const Index = () => {
   useEffect(() => {
     // Get the the data of product that will be edited
     setLoading(true)
-    db.doc(`/products/${id}`).get().then(product => setProduct({ id: product.id, ...product.data() }))
-      .finally(() => {
-        setLoading(false);
-      });
+    api.get(`/products?_id=${id}`).then(response => {
+      setProduct(response.data.product)
+      setLoading(false)
+    })
   }, [id]);
 
   return (
@@ -31,22 +31,22 @@ const Index = () => {
           <span className="text-2xl w-full text-barbina-brown mx-6 px-2 add-product-title-underline">
             Editar {product?.name}
           </span>
-          
+
           {
-          //If is loading
-          loading ? (
-            <span className="w-full justify-center text-gray-600 py-40 flex items-center text-xl gap-2">
-              Carregando <LoadingIcon className="rotate" />
-            </span>
-          ) :
-          //If found the product or not
-            !product ? (
+            //If is loading
+            loading ? (
               <span className="w-full justify-center text-gray-600 py-40 flex items-center text-xl gap-2">
-                Produto não encontrado <IoMdSad />
+                Carregando <LoadingIcon className="rotate" />
               </span>
-            ) : (
-              <CreateOrEditProduct datas={{ product }} />
-            )}
+            ) :
+              //If found the product or not
+              !product ? (
+                <span className="w-full justify-center text-gray-600 py-40 flex items-center text-xl gap-2">
+                  Produto não encontrado <IoMdSad />
+                </span>
+              ) : (
+                <CreateOrEditProduct datas={{ product }} />
+              )}
         </div>
       </AdminLayout>
     </>

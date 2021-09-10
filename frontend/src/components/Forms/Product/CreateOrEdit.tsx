@@ -1,5 +1,5 @@
 import React, { FormEvent, useEffect, useState } from "react";
-import { db, storage } from "../../../services/firebase";
+import api, { authorization } from "../../../services/api";
 import CurrencyInput from "react-currency-input-field";
 import Outclick from "../../Outclick";
 import Warning, { WarningType } from "../../Warning";
@@ -10,7 +10,7 @@ import AOS from "aos";
 AOS.init();
 
 export type ProductType = {
-  id: string;
+  _id: string;
   name?: string;
   description?: string;
   category?: string;
@@ -32,11 +32,23 @@ type CreateOrEditProductProps = {
 };
 
 const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
-  const [warnings, setWarnings] = useState<WarningType[]>();
-
+  // Which of the popups will appear in the screen.
   const [popup, setPopup] = useState<"" | "create-category">("");
 
+
+  // Store ocurred errors when send data to api 
+  const [errors, setErrors] = useState<{ code?: string, message: string, showIn: string }[]>();
+  // Warnings in the form inputs
+  const [warnings, setWarnings] = useState<WarningType[]>();
+  // form state
+  const [loading, setLoading] = useState<boolean>(false);
+
+
   const history = useHistory();
+
+  // The category will display in the category input
+  const [categories, setCategories] = useState<CategoryType[]>([]);
+
 
   // form inputs
   const [name, setName] = useState<string>(datas.product?.name || "");
@@ -45,94 +57,76 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
   const [price, setPrice] = useState<number>(datas.product?.price || 0.0);
   const [files, setFiles] = useState<(File & { preview: string } | any & { preview: string })[]>(datas.product?.image ? [{ preview: datas.product?.image }] : []);
 
-  const UploadImage = async (file: File, { path, name }: { path: string, name: string }) => {
-    let ref = storage.ref();
-    return await ref.child(`${path}/${name}`).put(file).then(async (snapshot) => {
-      // Get the image url
-      return await storage.ref(`${path}/${name}`).getDownloadURL();
-    });
-  }
 
   //Submit form
   const HandleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    // Set the warnings that occurs in the process
-    const myWarnings: WarningType[] = [];
-
-    // datas filter
-    if (name.length < 3)
-      myWarnings.push({ input: "name", message: "O nome do produto deve ter no mínimo 3 caracteres.", type: "warning" });
-    if (!category)
-      myWarnings.push({ input: "category", message: "Você não selecionou uma categoria.", type: "warning" });
-
-    if (myWarnings.length > 0) {
-      setWarnings(myWarnings);
-      return;
-    }
+    if (loading) return;
+    setLoading(true)
 
     try {
-      let image = ""
-      // If it's going to update or create a product
-      if (!datas.product?.id) {
-        // The create product path
-        // Saving informations about the product in the database
-        await db.collection("products").add({ name, description, category, price }).then(async product => {
-          // Uploading the image of the product if the file exist
-          if (files[0]) {
-            // If the image is already uploaded or if it's going to upload a new image
-            if (files[0].name)
-              image = await UploadImage(files[0], { path: "images/products", name: product.id })
-            else
-              image = files[0].preview
-            product.update({ name, description, image, category, price });
-          }
-          myWarnings.push({ input: "", message: "Categoria adicionada com sucesso!", type: "success" });
-        }).catch((error) => {
-          myWarnings.push({ input: "", message: "Erro ao criar categoria.", type: "error" });
+      e.preventDefault();
+      // Set the warnings that occurs in the process
+      const myWarnings: WarningType[] = [];
 
-          throw new Error(error);
-        });
-      } else {
-        // The update product path
-        if (files[0]) {
-          // If the image is already uploaded or if it's going to upload a new image
-          if (files[0].name)
-            image = await UploadImage(files[0], { path: "images/products", name: datas.product.id })
-          else
-            image = files[0].preview
-        }
-        // Saving informations about the product in the database
-        await db.collection("products").doc(datas.product?.id).update({ name, image, description, category, price }).then(() => {
-          myWarnings.push({ input: "", message: "Categoria editada com sucesso!", type: "success" })
-        }).catch((error) => {
-          myWarnings.push({ input: "", message: "Erro ao editar categoria.", type: "error" });
-          throw new Error(error);
-        });
+      // datas filter
+      if (name.length < 3)
+        myWarnings.push({ input: "name", message: "O nome do produto deve ter no mínimo 3 caracteres.", type: "warning" });
+      if (!category)
+        myWarnings.push({ input: "category", message: "Você não selecionou uma categoria.", type: "warning" });
+
+      setWarnings(myWarnings);
+      if (myWarnings.length > 0) return;
+
+
+      // Saving data
+      let form = new FormData()
+      form.append("name", name)
+      form.append("description", description)
+      form.append("category", category)
+      form.append("price", price.toString())
+
+      if (files[0]?.name)
+        form.append("image", files[0])
+      else if (files[0]?.preview) {
+        form.append("image", files[0].preview)
       }
-    } catch (error) {
-      myWarnings.push({ input: "", message: `Algo deu errado. Erro: ${error}`, type: "error" });
-      console.error("Something went wrong: ", error);
-    }
 
-    setWarnings(myWarnings);
-
-    // Seeing if have ocurreted any problem. If doesn't then the user will be redirected to product list  
-    if (myWarnings.filter((myWarning) => myWarning.type === "error").length <= 0) {
-      callBack && callBack({ warnings: myWarnings });
-      history.push("/admin/products");
-      return;
+      if (!datas.product?._id) {
+        // Create product
+        await api.post("/products", form, { headers: { authorization } }).then(response => {
+          console.log(response.data)
+          history.push("/admin/products");
+        }).catch(error => {
+          console.error(error.response.data)
+          if (error.response.data.message)
+            setErrors([{ ...error.response.data, showIn: "sendForm" }])
+          else
+            setErrors([{ message: "Ocorreu um erro desconhecido.", showIn: "sendForm" }])
+        })
+      } else {
+        // Update product
+        form.append("_id", datas.product._id)
+        await api.put("/products", form, { headers: { authorization } }).then(response => {
+          console.log(response.data)
+          history.push("/admin/products");
+        }).catch(error => {
+          console.error(error.response.data)
+          if (error.response.data.message)
+            setErrors([{ ...error.response.data, showIn: "sendForm" }])
+          else
+            setErrors([{ message: "Ocorreu um erro desconhecido.", showIn: "sendForm" }])
+        })
+      }
+    } finally {
+      setLoading(false)
     }
   };
 
-  const [categories, setCategories] = useState<CategoryType[]>([]);
-
   const HandleLoadCategories = async () => {
     // Load the categories that will show in the category select input
-    await db.collection("categories").get().then((querySnapshot) => {
-      let myCategories: CategoryType[] = [];
-      querySnapshot.forEach(doc => myCategories.push({ id: doc.id, name: doc.data().name }));
-      setCategories(myCategories);
-    });
+    await api.get("/categories/list").then(response => {
+      setCategories(response.data.categories)
+    })
   };
 
   useEffect(() => {
@@ -143,6 +137,7 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
     <>
       {popup !== "" && (
         <div className="fixed z-10 flex items-center justify-center top-0 left-0 h-screen w-screen bg-black bg-opacity-70">
+
           <Outclick callback={() => setPopup("")}>
             <div>
               {
@@ -168,6 +163,14 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
         style={{ maxWidth: "700px" }}
         className="mx-4 px-4 py-4 my-4"
       >
+        {
+          errors &&
+          <div className="pb-2">
+            {errors.filter(error => error.showIn === 'sendForm').map(error =>
+              <p className="zoom-init-anim bg-red-50 text-red-500 px-2 py-1 border-red-600 border rounded my-2">{error.message}</p>
+            )}
+          </div>
+        }
         <div className="w-full my-2">
           <Dropzone
             accept="image/*"
@@ -263,7 +266,7 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
                 <option value="">Escolher categoria</option>
                 {categories &&
                   categories.map((category) => (
-                    <option key={category.id} value={category.id}>
+                    <option key={category._id} value={category._id}>
                       {category.name}
                     </option>
                   ))}
@@ -299,7 +302,7 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
         </div>
         <hr className="my-4" />
         <button className="mx-2 text-white bg-yellow-400 hover:bg-yellow-500 duration-300 h-10 py-2 px-6 rounded cursor-pointer" type="submit">
-          {datas.product?.id ? "Editar produto" : "Criar produto"}
+          {loading ? "carregando..." : datas.product?._id ? "Editar produto" : "Criar produto"}
         </button>
       </form>
     </>

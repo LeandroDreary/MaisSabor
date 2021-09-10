@@ -11,19 +11,18 @@ const Index = () => {
 
   const { user, signInWithGoogle, signOut, signInWithEmailAndPassword, signUpWithEmailAndPassword } = useAuth();
 
-  const [displayUserDropdown, setDisplayUserDropdown] = useState<boolean>(false);
-
-  const [name, setName] = useState<string>("");
-
-  const [email, setEmail] = useState<string>("");
-
-  const [password, setPassword] = useState<string>("");
-
   const [showNavbar, setShowNavbar] = useState<boolean>(true);
-
   const [popup, setPopup] = useState<"" | "login-form" | "register-form">("");
 
+  // form inputs
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+
+
   const [y, setY] = useState(window.scrollY);
+  const [displayUserDropdown, setDisplayUserDropdown] = useState<boolean>(false);
+
 
   useEffect(() => {
     window.addEventListener("scroll", (e: any) => {
