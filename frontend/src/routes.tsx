@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, BrowserRouter, Switch } from "react-router-dom";
+import { Route, BrowserRouter, Routes } from "react-router-dom";
 import { AuthContextProvider } from "./context/AuthContext";
 
 // pages
@@ -13,23 +13,23 @@ import AdminEditProduct from "./pages/Admin/Products/Edit";
 import AdminProducts from "./pages/Admin/Products";
 import AdminCategories from "./pages/Admin/Categories";
 
-const Routes = () => {
+
+const Index = () => {
   return (
     <BrowserRouter>
       <AuthContextProvider>
-        <Route component={Home} path="/" exact />
-        <Route component={Contato} path="/contato" />
-
-        <Switch>
-          <Route component={AdminAddProduct} path="/admin/products/add" />
-          <Route component={AdminEditProduct} path="/admin/products/edit/:id" />
-          <Route component={AdminCategories} path="/admin/categories" />
-          <Route component={AdminProducts} path="/admin/products" />
-          <Route component={Admin} path="/admin" />
-        </Switch>
+        <Routes>
+          <Route element={<Home />} path="/" />
+          <Route element={<Contato />} path="/contato" />
+          <Route element={<AdminAddProduct />} path="/admin/products/add" />
+          <Route element={<AdminEditProduct />} path="/admin/products/edit/:id" />
+          <Route element={<AdminCategories />} path="/admin/categories" />
+          <Route element={<AdminProducts />} path="/admin/products" />
+          <Route element={<Admin />} path="/admin" />
+        </Routes>
       </AuthContextProvider>
     </BrowserRouter>
-  );
+  )
 };
 
-export default Routes;
+export default Index;

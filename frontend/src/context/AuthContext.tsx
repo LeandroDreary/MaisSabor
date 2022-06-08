@@ -1,18 +1,18 @@
 import { createContext, ReactNode, useEffect, useState } from "react";
-import api from "../services/api";
+import api, { authorization } from "../services/api";
 
 type User = {
-    id: string;
-    name: string;
-    avatar: string;
+    username: string;
+    email: string;
+    profilePicture: string;
 }
 
 type AuthContextType = {
-    user: User | undefined;
+    userInfo: User | undefined;
     signOut: () => Promise<void>;
     signInWithGoogle: () => Promise<void>;
-    signInWithEmailAndPassword: (email: string, password: string) => Promise<void>;
-    signUpWithEmailAndPassword: (name: string, email: string, password: string) => Promise<void>;
+    signIn: (usernameOrEmail: string, password: string) => Promise<void>;
+    signUp: (username: string, email: string, password: string) => Promise<void>;
 }
 
 export const AuthContext = createContext({} as AuthContextType);
@@ -22,32 +22,36 @@ type AuthContextProviderProps = {
 }
 
 export function AuthContextProvider(props: AuthContextProviderProps) {
-    const [user, setUser] = useState<User>()
+    const [userInfo, setUserInfo] = useState<User>()
 
     useEffect(() => {
-        
+        api.get("/login", { headers: { authorization } }).then(response => {
+            setUserInfo(response.data.user);
+        }).catch(console.error)
     }, [])
 
     async function signInWithGoogle() {
-        
+
     }
 
-    async function signUpWithEmailAndPassword(name: string, email: string, password: string) {
-        
+    async function signUp(username: string, email: string, password: string) {
+
     }
 
-    async function signInWithEmailAndPassword(email: string, password: string) {
-        await api.post("/login", {email, password}).then(resp => {
-
-        })
+    async function signIn(usernameOrEmail: string, password: string) {
+        api.post("/login", { usernameOrEmail, password }).then(response => {
+            setUserInfo(response.data.user);
+            localStorage.setItem("token", response.data.token);
+        }).catch(console.error)
     }
 
     async function signOut() {
-        
+        setUserInfo({ username: "", email: "", profilePicture: "" });
+        localStorage.setItem("token", "");
     }
 
     return (
-        <AuthContext.Provider value={{ user, signInWithGoogle, signUpWithEmailAndPassword, signInWithEmailAndPassword, signOut }}>
+        <AuthContext.Provider value={{ userInfo, signInWithGoogle, signUp, signIn, signOut }}>
             {props.children}
         </AuthContext.Provider>
     );

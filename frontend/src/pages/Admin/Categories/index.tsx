@@ -26,12 +26,24 @@ const Index = () => {
   // Variable to store the category that will be deleted
   const [deleteSelectedCategory, setDeleteSelectedCategory] = useState<CategoryType>();
 
+  const HandleDeleteCategory = async (e: FormEvent) => {
+    e.preventDefault();
 
+    // Delete category
+    await api.delete(`/categories?_id=${deleteSelectedCategory?._id}`, { headers: { authorization } }).then(resp => {
+      setPopup("")
+      HandleLoadCategories();
+    }).catch(error => {
+      console.error(error.response.data)
+      if (error.response.data.message)
+        setErrors([{ ...error.response.data, showIn: "delete" }])
+      else
+        setErrors([{ message: "Ocorreu um erro desconhecido.", showIn: "delete" }])
+    })
+  }
 
   const HandleLoadCategories = async () => {
-    if (loading) return
     setLoading(true)
-
     try {
       // Getting the categories in the database
       await api.get("/categories/list").then(resp => {
@@ -47,26 +59,6 @@ const Index = () => {
       setLoading(false)
     }
   };
-
-
-
-  const HandleDeleteCategory = async (e: FormEvent) => {
-    e.preventDefault();
-
-    // Delete category
-    await api.delete(`/categories?_id=${deleteSelectedCategory?._id}`, { headers: { authorization } }).then(resp => {
-      setPopup("")
-      HandleLoadCategories();
-    }).catch(error => {
-      console.error(error.response.data)
-      if (error.response.data.message)
-        setErrors([{ ...error.response.data, showIn: "delete" }])
-      else
-        setErrors([{ message: "Ocorreu um erro desconhecido.", showIn: "delete" }])
-    })
-
-  }
-
 
   useEffect(() => {
     HandleLoadCategories();
@@ -116,11 +108,9 @@ const Index = () => {
                         Apagar categoria
                       </h2>
                       {
-                        errors && errors.map(error => {
-                          error.showIn === "delete" ?
-                            <p className="bg-red-50 text-red-500 px-2 py-1 border-red-600 border rounded my-2">{error.message}</p>
-                            : <></>
-                        })
+                        errors && errors.filter(err => err.showIn === "delete").map(error =>
+                          <p key={error.message} className="bg-red-50 text-red-500 px-2 py-1 border-red-600 border rounded my-2">{error.message}</p>
+                        )
                       }
                       <hr />
                       <p className="text-md pt-4 text-gray-700">
@@ -151,9 +141,7 @@ const Index = () => {
             <button
               onClick={() => {
                 setPopup("create-category");
-              }}
-              className="bg-yellow-500 hover:bg-yellow-700 flex items-center gap-1 text-white py-1 mx-2 my-4 px-3 rounded cursor-pointer"
-            >
+              }} className="bg-green-600 ease-out duration-300 hover:bg-green-800 flex items-center gap-1 text-white py-1 mx-2 my-4 px-3 rounded cursor-pointer">
               Nova categoria
             </button>
             <button
@@ -164,11 +152,9 @@ const Index = () => {
             </button>
           </div>
           {
-            errors && errors.map(error => {
-              error.showIn === "load" ?
-                <p className="bg-red-50 text-red-500 px-2 py-1 border-red-600 border rounded my-2">{error.message}</p>
-                : <></>
-            })
+            errors && errors.filter(error => error.showIn === "load").map(error =>
+              <p key={error.message} className="bg-red-50 text-red-500 px-2 py-1 border-red-600 border rounded my-2">{error.message}</p>
+            )
           }
           <hr />
           <div
@@ -177,9 +163,9 @@ const Index = () => {
           >
             {
               loading ?
-               <span className="col-span-4 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">
-                Carregando <VscLoading className="rotate" />
-              </span> :
+                <span className="col-span-4 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">
+                  Carregando <VscLoading className="rotate" />
+                </span> :
                 categories &&
                 categories.map((category) => {
                   return (

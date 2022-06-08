@@ -10,11 +10,13 @@ app.use(
   cors({
     origin:
       process.env.NODE_ENV !== "production"
-        ? ["http://localhost:3000"]
+        ? [
+          "http://localhost:3000"
+        ]
         : [
-            "https://valoriza.vercel.app",
-            "https://valoriza.leandroviegas.com.br",
-          ],
+          "https://valoriza.vercel.app",
+          "https://valoriza.leandroviegas.com.br",
+        ],
     credentials: true,
     optionsSuccessStatus: 200,
   })
@@ -27,7 +29,7 @@ app.use(router);
 app.use(
   (err: Error, request: Request, response: Response, next: NextFunction) => {
     if (err instanceof Error) {
-      // Get error translated to the language you want
+      // Get the error translated to the language you want
       const error: { message: string, status: number } | undefined = GetError(process.env.LANGUAGE, err.message)
       // If found the error
       if (error)

@@ -38,7 +38,6 @@ class CategoryController {
 
     async post(request: Request, response: Response) {
         const { name } = request.body;
-        console.log(name)
         // Connect to the database
         await DbConnect();
 
@@ -61,7 +60,7 @@ class CategoryController {
 
         // Connect to the database
         await DbConnect();
-        console.log(_id)
+
         // If is _id string
         if (typeof _id !== 'string')
             throw new Error("category/invalid-informations")

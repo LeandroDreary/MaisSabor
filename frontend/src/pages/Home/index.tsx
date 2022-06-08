@@ -6,13 +6,13 @@ import { Card } from "./../../components/Card";
 import { FaWhatsapp } from "react-icons/fa";
 import AOS from "aos";
 import { ProductType } from "../../components/Forms/Product/CreateOrEdit";
-import api, { authorization } from "../../services/api";
+import api from "../../services/api";
 import { VscLoading as LoadingIcon, IoMdSad } from "react-icons/all";
 import { CategoryType } from "../../components/Forms/Category/CreateOrEdit";
 AOS.init();
 
 const Home = () => {
-  const RemoveUndefined = (obj: any) => Object.keys(obj).forEach(key => obj[key] === undefined ? delete obj[key] : {})
+  // const RemoveUndefined = (obj: any) => Object.keys(obj).forEach(key => obj[key] === undefined ? delete obj[key] : {})
 
   const [productsLoading, setProductsLoading] = useState<boolean>(false);
   const [categoriesLoading, setCategoriesLoading] = useState<boolean>(false);
@@ -24,41 +24,43 @@ const Home = () => {
 
 
   const HandleLoadProducts = async () => {
-    if (productsLoading) return false
     setProductsLoading(true);
-    try {
-      var params = new URLSearchParams();
 
-      if (filters.category) params.append("category", filters.category)
-      if (filters.search) params.append("search", filters.search)
+    if (!productsLoading)
+      try {
+        var params = new URLSearchParams();
 
-      // Get the products in the database
-      await api.get(`/products/list?${params.toString()}`).then(resp => {
-        setProducts(resp.data.products)
-      })
-    } finally {
-      setProductsLoading(false)
-    }
+        if (filters.category) params.append("category", filters.category)
+        if (filters.search) params.append("search", filters.search)
+
+        // Get the products in the database
+        await api.get(`/products/list?${params.toString()}`).then(resp => {
+          setProducts(resp.data.products)
+        })
+      } finally {
+        setProductsLoading(false)
+      }
   };
 
 
   const HandleLoadCategories = async () => {
-    if (categoriesLoading) return false
     setCategoriesLoading(true);
-    // Load the categories that will show in the category select input
-    try {
-      await api.get("/categories/list").then(resp => {
-        setCategories(resp.data.categories)
-      })
-    } finally {
-      setCategoriesLoading(false)
-    }
+
+    // Load the categories which will appear in the category select input
+    if (!categoriesLoading)
+      try {
+        await api.get("/categories/list").then(resp => {
+          setCategories(resp.data.categories)
+        })
+      } finally {
+        setCategoriesLoading(false)
+      }
   };
 
 
   useEffect(() => {
-    HandleLoadProducts();
-    HandleLoadCategories();
+    HandleLoadProducts()
+    HandleLoadCategories()
   }, []);
 
   return (

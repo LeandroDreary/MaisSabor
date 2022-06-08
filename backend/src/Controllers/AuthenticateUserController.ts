@@ -4,13 +4,13 @@ import { ShowloggedUserService } from "../services/ShowloggedUserService";
 
 class AuthenticateUserController {
   async post(request: Request, response: Response) {
-    const { username, email, password } = request.body;
+    const { usernameOrEmail, password } = request.body;
 
     const authenticateUserService = new AuthenticateUserService();
 
-    const token = await authenticateUserService.execute({ username, email, password })
+    const { token, user } = await authenticateUserService.execute({ usernameOrEmail, password })
 
-    return response.json({ token })
+    return response.json({ token, user })
   }
 
   async get(request: Request, response: Response) {

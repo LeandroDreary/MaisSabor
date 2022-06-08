@@ -124,8 +124,6 @@ class ProductController {
             if (fields.price)
                 product.price = Number(fields.price)
 
-            console.log(fields.image?.toString())
-
             if (fields.image) {
                 product.image = fields.image.toString()
             }

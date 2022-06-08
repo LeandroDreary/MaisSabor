@@ -5,24 +5,27 @@ import Icon from "./../../assets/images/icon.png";
 import Outclick from "../Outclick";
 import { useAuth } from "../../hooks/Auth";
 import { CgGoogle, CgLogIn, FaArrowDown, BiLogOut } from 'react-icons/all'
+import api from "../../services/api";
 
 const Index = () => {
   const [showNavbarMenu, setShowNavbarMenu] = useState<boolean>();
 
-  const { user, signInWithGoogle, signOut, signInWithEmailAndPassword, signUpWithEmailAndPassword } = useAuth();
-
   const [showNavbar, setShowNavbar] = useState<boolean>(true);
   const [popup, setPopup] = useState<"" | "login-form" | "register-form">("");
 
-  // form inputs
-  const [name, setName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const { userInfo, signInWithGoogle, signOut, signIn, signUp } = useAuth()
 
+  // form inputs
+  const [loginForm, setLoginForm] = useState<{ usernameOrEmail: string, password: string }>({ usernameOrEmail: "", password: "" });
+  const [registerForm, setRegisterForm] = useState<{ username: string, email: string, password: string }>({ username: "", email: "", password: "" });
 
   const [y, setY] = useState(window.scrollY);
   const [displayUserDropdown, setDisplayUserDropdown] = useState<boolean>(false);
 
+  const Login = () => {
+    signIn(loginForm.usernameOrEmail, loginForm.password)
+    setPopup("")
+  }
 
   useEffect(() => {
     window.addEventListener("scroll", (e: any) => {
@@ -38,9 +41,8 @@ const Index = () => {
   }, [y]);
 
   useEffect(() => {
-    if (user)
-      setPopup("")
-  }, [user])
+
+  }, [])
 
   return (
     <>
@@ -60,7 +62,7 @@ const Index = () => {
                         <hr className="w-full" />
                       </div>
                       <div className="w-full py-2 flex justify-center">
-                        <button onClick={signInWithGoogle} type="button" className="flex items-center gap-2 bg-red-500 hover:bg-red-700 px-4 py-2 text-white">
+                        <button type="button" className="flex items-center gap-2 bg-red-500 hover:bg-red-700 px-4 py-2 text-white">
                           <CgGoogle />
                           Entrar com o google
                         </button>
@@ -69,18 +71,18 @@ const Index = () => {
                         <span className="absolute text-gray-500 bg-white text-sm px-2">ou</span>
                         <hr className="w-full" />
                       </div>
-                      <form onClick={e => { e.preventDefault(); signInWithEmailAndPassword(email, password) }}>
+                      <form onSubmit={e => { e.preventDefault(); Login(); }}>
                         <div className="w-full my-2">
                           <label className="text-gray-600" htmlFor="name">
-                            Email:
+                            Email ou nome de usuário:
                           </label>
                           <div className="bg-white flex border border-gray-200 rounded">
                             <input
-                              value={email}
-                              onChange={e => setEmail(e.target.value)}
-                              name="email"
-                              placeholder="Email"
-                              type="email"
+                              defaultValue=""
+                              onChange={e => setLoginForm({ ...loginForm, usernameOrEmail: e.target.value })}
+                              name="usernameOrEmail"
+                              placeholder="Digite seu email ou nome de usuário"
+                              type="text"
                               className="p-1 px-2 appearance-none outline-none w-full text-gray-600"
                             />
                           </div>
@@ -91,10 +93,10 @@ const Index = () => {
                           </label>
                           <div className="bg-white flex border border-gray-200 rounded">
                             <input
-                              value={password}
-                              onChange={e => setPassword(e.target.value)}
+                              defaultValue=""
+                              onChange={e => setLoginForm({ ...loginForm, password: e.target.value })}
                               name="password"
-                              placeholder="Senha"
+                              placeholder="Digite sua senha"
                               type="password"
                               className="p-1 px-2 appearance-none outline-none w-full text-gray-600"
                             />
@@ -117,17 +119,17 @@ const Index = () => {
                       Registrar-se
                     </h2>
                     <hr />
-                    <form onClick={e => { e.preventDefault(); signUpWithEmailAndPassword(name, email, password) }}>
+                    <form onClick={e => { e.preventDefault(); }}>
                       <div className="w-full my-2">
                         <label className="text-gray-600" htmlFor="name">
-                          name:
+                          Nome de usuário:
                         </label>
                         <div className="bg-white flex border border-gray-200 rounded">
                           <input
-                            value={name}
-                            onChange={e => setName(e.target.value)}
-                            name="name"
-                            placeholder="Nome"
+                            defaultValue=""
+                            onChange={e => setRegisterForm({ ...registerForm, username: e.target.value })}
+                            name="username"
+                            placeholder="Digite seu nome de usuário"
                             type="text"
                             className="p-1 px-2 appearance-none outline-none w-full text-gray-600"
                           />
@@ -139,10 +141,10 @@ const Index = () => {
                         </label>
                         <div className="bg-white flex border border-gray-200 rounded">
                           <input
-                            value={email}
-                            onChange={e => setEmail(e.target.value)}
+                            defaultValue=""
+                            onChange={e => setRegisterForm({ ...registerForm, email: e.target.value })}
                             name="email"
-                            placeholder="Email"
+                            placeholder="Dogite seu email"
                             type="email"
                             className="p-1 px-2 appearance-none outline-none w-full text-gray-600"
                           />
@@ -154,10 +156,10 @@ const Index = () => {
                         </label>
                         <div className="bg-white flex border border-gray-200 rounded">
                           <input
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
+                            defaultValue=""
+                            onChange={e => setRegisterForm({ ...registerForm, password: e.target.value })}
                             name="password"
-                            placeholder="Senha"
+                            placeholder="digite sua senha"
                             type="password"
                             className="p-1 px-2 appearance-none outline-none w-full text-gray-600"
                           />
@@ -231,26 +233,28 @@ const Index = () => {
                   Sobre
                 </a>
                 {
-                  user ? (<>
+                  userInfo ? (<>
                     <span className="text-right block lg:inline-block lg:mt-0 text-light-yellow my-4 lg:my-0 mr-6">
                       <span className="flex gap-3 h-0 justify-end my-10 lg:my-0 items-center">
                         <span className="relative">
                           <span onClick={() => setDisplayUserDropdown(true)} className="flex items-center gap-1 menuOptions">
-                            {user.name}
+                            {userInfo.username}
                             <FaArrowDown />
                           </span>
                           {
                             displayUserDropdown && (
                               <Outclick callback={() => setDisplayUserDropdown(false)}>
                                 <div data-aos="zoom-in" data-aos-duration="500" className="rounded-sm shadow-lg mt-2 text-barbina-brown bg-white py-1 text-sm absolute right-0">
-                                  <span onClick={() => { signOut(); setDisplayUserDropdown(false); }} className="cursor-pointer hover:bg-gray-100 px-3 flex items-center gap-1">Logout<BiLogOut /></span>
+                                  <span onClick={signOut} className="cursor-pointer hover:bg-gray-100 px-3 flex items-center gap-1">Logout<BiLogOut /></span>
                                 </div>
                               </Outclick>
                             )
                           }
 
                         </span>
-                        <img className="h-10 rounded-full w-10" src={user.avatar} alt={user.name} />
+                        {userInfo.profilePicture &&
+                          <img className="h-10 rounded-full w-10" src={userInfo.profilePicture} alt={userInfo.username} />
+                        }
                       </span>
                     </span>
 

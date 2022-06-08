@@ -4,7 +4,7 @@ import CurrencyInput from "react-currency-input-field";
 import Outclick from "../../Outclick";
 import Warning, { WarningType } from "../../Warning";
 import CreateOrEditCategory, { CategoryType } from "../Category/CreateOrEdit";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Dropzone from "react-dropzone";
 import AOS from "aos";
 AOS.init();
@@ -43,8 +43,7 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
   // form state
   const [loading, setLoading] = useState<boolean>(false);
 
-
-  const history = useHistory();
+  let navigate = useNavigate();
 
   // The category will display in the category input
   const [categories, setCategories] = useState<CategoryType[]>([]);
@@ -94,8 +93,7 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
       if (!datas.product?._id) {
         // Create product
         await api.post("/products", form, { headers: { authorization } }).then(response => {
-          console.log(response.data)
-          history.push("/admin/products");
+          navigate("/admin/products");
         }).catch(error => {
           console.error(error.response.data)
           if (error.response.data.message)
@@ -108,7 +106,7 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
         form.append("_id", datas.product._id)
         await api.put("/products", form, { headers: { authorization } }).then(response => {
           console.log(response.data)
-          history.push("/admin/products");
+          navigate("/admin/products");
         }).catch(error => {
           console.error(error.response.data)
           if (error.response.data.message)
@@ -257,7 +255,6 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
               <select
                 value={category}
                 onChange={(e) => {
-                  console.log(e.target.value);
                   setCategory(e.target.value);
                 }}
                 name="category"

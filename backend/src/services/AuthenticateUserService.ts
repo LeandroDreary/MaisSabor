@@ -4,21 +4,18 @@ import { User } from "../Model/UserModel";
 import dbConnect from "../utils/dbConnect";
 
 interface IAuthenticateRequest {
-    username: string;
-    email: string;
+    usernameOrEmail: string;
     password: string;
 }
 
 class AuthenticateUserService {
-    async execute({ username, email, password }: IAuthenticateRequest) {
-        if ((!username && !email) || !password) throw new Error("authentication/email-password-incorrect");
+    async execute({ usernameOrEmail, password }: IAuthenticateRequest) {
+        if (!usernameOrEmail || !password) throw new Error("authentication/email-password-incorrect");
 
         // Connecting to the database
         await dbConnect()
 
-        let user = await User.findOne({
-            email
-        }).exec();
+        let user = await User.findOne({ $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }] }).select("_id username email profilePicture password").exec();
 
         if (!user) throw new Error("authentication/email-password-incorrect");
 
@@ -28,11 +25,19 @@ class AuthenticateUserService {
 
         const token = sign(
             { email: user.email },
-            process.env.JSONWEBTOKEN_DECODE,
+            process.env.JSONWEBTOKEN_DECODE_KEY,
             { subject: user.id, expiresIn: "30d" }
         );
 
-        return token;
+        return {
+            token,
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                profilePicture: user.profilePicture
+            }
+        };
     }
 }
 
