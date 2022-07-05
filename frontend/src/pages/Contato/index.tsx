@@ -1,7 +1,8 @@
-import React from 'react';
 import './index.css';
-import Navbar from '../../components/Navbar';
-import Footer from '../../components/Footer';
+
+import Navbar from '../../components/Pages/Navbar';
+import Footer from '../../components/Pages/Footer';
+
 import { FaMailBulk } from 'react-icons/fa';
 
 const Contato = () => {

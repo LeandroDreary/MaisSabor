@@ -9,6 +9,7 @@ export type UserModelT = {
   profilePicture?: string;
   password: string;
   link: string;
+  admin?: boolean;
 };
 
 class UserEntity {
@@ -23,6 +24,8 @@ class UserEntity {
   readonly link: string;
 
   password: string;
+
+  readonly admin?: boolean;
 
   // Validation function
   async validate() {
@@ -40,13 +43,14 @@ class UserEntity {
     }
   }
 
-  constructor({ _id, username, email, profilePicture, password, link }: UserModelT) {
+  constructor({ _id, username, email, profilePicture, password, link, admin }: UserModelT) {
     this._id = _id;
-    this.email = email;
-    this.username = username;
     this.link = link;
-    this.profilePicture = profilePicture;
+    this.email = email;
+    this.admin = admin;
+    this.username = username;
     this.password = password;
+    this.profilePicture = profilePicture;
   }
 }
 

@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
-import CreateOrEditProduct, {
-  ProductType,
-} from "../../../../components/Forms/Product/CreateOrEdit";
-import AdminLayout from "../../../../layout/AdminLayout";
-import "./index.css";
 import { useParams } from "react-router-dom";
+import "./index.css";
+
+import CreateOrEditProduct, { ProductType } from "../../../../components/Forms/Product/CreateOrEdit";
+import AdminLayout from "../../../../layout/AdminLayout";
+
 import api from "../../../../services/api";
-import { IoMdSad, VscLoading as LoadingIcon } from "react-icons/all";
+
+import { VscLoading, IoMdSad } from "react-icons/all"
 
 const Index = () => {
   const { id }: any = useParams();
@@ -36,7 +37,7 @@ const Index = () => {
             //If is loading
             loading ? (
               <span className="w-full justify-center text-gray-600 py-40 flex items-center text-xl gap-2">
-                Carregando <LoadingIcon className="rotate" />
+                Carregando <VscLoading className="rotate" />
               </span>
             ) :
               //If found the product or not

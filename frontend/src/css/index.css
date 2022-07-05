@@ -1,0 +1,13 @@
+@media (min-width: 480px ) and (max-width: 768px) {
+    .mc\:col-span-3 {
+        grid-column: span 3 / span 3;
+    }
+}
+
+.text-barbina-brown {
+    color: #26110a;
+}
+
+.text-barbina-dark-brown {
+    color: #170904;
+}

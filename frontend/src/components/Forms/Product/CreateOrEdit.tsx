@@ -1,11 +1,14 @@
 import React, { FormEvent, useEffect, useState } from "react";
-import api, { authorization } from "../../../services/api";
-import CurrencyInput from "react-currency-input-field";
-import Outclick from "../../Outclick";
-import Warning, { WarningType } from "../../Warning";
-import CreateOrEditCategory, { CategoryType } from "../Category/CreateOrEdit";
 import { useNavigate } from "react-router-dom";
+
+import api, { authorization } from "../../../services/api";
+
+import CurrencyInput from "react-currency-input-field";
 import Dropzone from "react-dropzone";
+import Outclick from "../../Utils/Outclick";
+import Warning, { WarningType } from "../../Utils/Warning";
+import CreateOrEditCategory, { CategoryType } from "../Category/CreateOrEdit";
+
 import AOS from "aos";
 AOS.init();
 

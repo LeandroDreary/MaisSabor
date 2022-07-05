@@ -2,12 +2,7 @@
   background-color: #bf810d;
 }
 
-.text-light-yellow {
-  color: #ffedb4;
-}
-
 .menuOptions {
-  color: #ffedb4;
   position: relative;
   transition: color 450ms;
 }
@@ -35,15 +30,4 @@
 
 .menuOptions:hover {
   color: #ffc400;
-}
-
-@media (max-width: 1024px) {
-  .menu-items {
-    max-width: 300px;
-    background: #4a321f;
-    z-index: 20;
-  }
-  .menu-items.hidde{
-    right: -300px;
-  }
 }

@@ -1,14 +1,17 @@
 import React, { FormEvent, useEffect, useState } from "react";
-import { BiPencil, BiTrash } from "react-icons/all";
+import "./index.css"
+
+import api, { authorization } from "../../../services/api";
+
 import { Link } from "react-router-dom";
-import { Card } from "../../../components/Card";
+import { ProductCard } from "../../../components/Pages/ProductCard";
+import Outclick from "../../../components/Utils/Outclick";
+
 import { CategoryType } from "../../../components/Forms/Category/CreateOrEdit";
 import { ProductType } from "../../../components/Forms/Product/CreateOrEdit";
-import Outclick from "../../../components/Outclick";
 import AdminLayout from "../../../layout/AdminLayout";
-import api, { authorization } from "../../../services/api";
-import "./index.css"
-import { VscLoading, IoMdSad } from "react-icons/all";
+
+import { IoMdSad, VscLoading, BiPencil, BiTrash } from "react-icons/all";
 
 const Index = () => {
   // The popup selected to show in the screen 
@@ -29,7 +32,7 @@ const Index = () => {
   const [filters, setFilters] = useState<{ category?: string, search?: string }>()
 
 
-  const HandleLoadProducts = async (filters: { category?: string, search?: string } | undefined) => {
+  const HandleLoadProducts = async (filters?: { category?: string, search?: string }) => {
     setLoading(true);
     try {
       // Get the products in the database
@@ -187,41 +190,33 @@ const Index = () => {
               </div>
             </form>
             <hr />
-            <div className="grid grid-cols-4 gap-2 p-2">
+            <div className="grid sm:grid-cols-6 lg:grid-cols-5 gap-2 p-2">
               {loading ? (
-                <span className="col-span-4 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">
+                <span className="col-span-5 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">
                   Carregando <VscLoading className="rotate" />
                 </span>
               ) : !products ?
-                <span className="col-span-4 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">
-                  Sem resultados encontrados <IoMdSad />
+                <span className="col-span-5 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">
+                  Sem resultados encontrados
+                  <IoMdSad />
                 </span>
                 :
                 products.map(product => {
                   return (
-                    <Card key={product._id} product={product}>
+                    <ProductCard key={product._id} product={product}>
                       <hr className="border-barbina-light-brown" />
-                      <div className="pt-2">
-                        <div className="inline-block">
-                          <Link to={`/admin/products/edit/${product._id}`}>
-                            <button className="bg-yellow-500 ease-out duration-300 mb-2 hover:bg-yellow-700 flex items-center gap-1 text-white py-1 text-sm px-3 rounded cursor-pointer">
-                              <BiPencil /> Editar
-                            </button>
-                          </Link>
-                        </div>
-                        <div className="inline-block mx-2">
-                          <button
-                            onClick={() => {
-                              setDeleteSelectedProduct(product);
-                              setPopup("delete-product");
-                            }}
-                            className="bg-red-500 ease-out duration-300 hover:bg-red-700 flex items-center gap-1 text-white py-1 text-sm px-3 rounded cursor-pointer"
-                          >
-                            <BiTrash /> apagar
-                          </button>
-                        </div>
+                      <div className="pt-2 flex items-center gap-1 mb-2">
+                        <Link className="grow justify-center bg-yellow-500 ease-out duration-300 hover:bg-yellow-700 flex items-center gap-1 text-white py-1 text-sm rounded cursor-pointer" to={`/admin/products/edit/${product._id}`}>
+                          <BiPencil /> Editar
+                        </Link>
+                        <button onClick={() => {
+                          setDeleteSelectedProduct(product);
+                          setPopup("delete-product");
+                        }} className="grow justify-center bg-red-500 ease-out duration-300 hover:bg-red-700 flex items-center gap-1 text-white py-1 text-sm rounded cursor-pointer">
+                          <BiTrash /> Apagar
+                        </button>
                       </div>
-                    </Card>
+                    </ProductCard>
                   );
                 })}
             </div>

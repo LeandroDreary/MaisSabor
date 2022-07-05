@@ -3,7 +3,7 @@ import { AuthenticateUserController } from "./Controllers/AuthenticateUserContro
 import { UserController } from "./Controllers/UserController";
 import { CategoryController } from "./Controllers/CategoryController";
 import { ProductController } from "./Controllers/ProductController";
-import { ensureAuthenticated } from "./middlewares/ensureAutenticated";
+import { ensureAdminAuthenticated, ensureAuthenticated } from "./middlewares/ensureAutenticated";
 
 const router = Router();
 
@@ -27,15 +27,15 @@ router.delete("/users", ensureAuthenticated, userController.delete);
 // User routes
 router.get("/products/list", productController.query);
 router.get("/products", productController.get);
-router.post("/products", ensureAuthenticated, productController.post);
-router.put("/products", ensureAuthenticated, productController.update);
-router.delete("/products", ensureAuthenticated, productController.delete);
+router.post("/products", ensureAdminAuthenticated, productController.post);
+router.put("/products", ensureAdminAuthenticated, productController.update);
+router.delete("/products", ensureAdminAuthenticated, productController.delete);
 
 // Categories routes
 router.get("/categories/list", categoryController.query);
 router.get("/categories", categoryController.get);
-router.post("/categories", ensureAuthenticated, categoryController.post);
-router.put("/categories", ensureAuthenticated, categoryController.update);
-router.delete("/categories", ensureAuthenticated, categoryController.delete);
+router.post("/categories", ensureAdminAuthenticated, categoryController.post);
+router.put("/categories", ensureAdminAuthenticated, categoryController.update);
+router.delete("/categories", ensureAdminAuthenticated, categoryController.delete);
 
 export { router };

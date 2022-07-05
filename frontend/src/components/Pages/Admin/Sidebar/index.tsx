@@ -1,19 +1,16 @@
-import React from "react";
 import { Link } from "react-router-dom";
-import { MdCreateNewFolder, BsListCheck } from "react-icons/all";
-import Icon from "../../../assets/images/icon.png";
 
+import { MdCreateNewFolder } from "react-icons/md";
+import { BsListCheck } from "react-icons/bs";
+
+import Icon from "./../../../../assets/images/icon.png";
 const index = () => {
   return (
     <>
       <div className="h-screen bg-yellow-500 w-60 p-4 shadow-lg rounded">
         <Link to={"/admin"}>
           <span>
-            <img
-              src={Icon}
-              className="w-3/4 mx-auto z-40"
-              alt="Icone Barbina"
-            />
+            <img src={Icon} className="w-3/4 mx-auto z-40" alt="Icone Barbina" />
           </span>
         </Link>
         <hr className="border-black mt-8" />

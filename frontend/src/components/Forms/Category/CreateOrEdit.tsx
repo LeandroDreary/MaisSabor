@@ -1,8 +1,10 @@
 import React, { FormEvent, useState } from "react";
+
 import api, { authorization } from "../../../services/api";
+
+import Warning, { WarningType } from "../../Utils/Warning";
+
 import AOS from "aos";
-import "aos/dist/aos.css";
-import Warning, { WarningType } from "../../Warning";
 AOS.init();
 
 export type CategoryType = {
@@ -69,7 +71,6 @@ const Index = ({ datas, callBack }: CreateOrEditCategoryProps) => {
         await api.put("/categories", { _id: datas.category?._id, name }, { headers: { authorization } }).then(() =>
           callBack && callBack()
         ).catch(error => {
-          console.error(error.response.data)
           if (error.response.data.message)
             setErrors([{ ...error.response.data, showIn: "sendForm" }])
           else

@@ -12,6 +12,7 @@ import AdminAddProduct from "./pages/Admin/Products/Create";
 import AdminEditProduct from "./pages/Admin/Products/Edit";
 import AdminProducts from "./pages/Admin/Products";
 import AdminCategories from "./pages/Admin/Categories";
+import { AdminAuth } from "./middlewares/AdminAuth";
 
 
 const Index = () => {
@@ -21,11 +22,13 @@ const Index = () => {
         <Routes>
           <Route element={<Home />} path="/" />
           <Route element={<Contato />} path="/contato" />
-          <Route element={<AdminAddProduct />} path="/admin/products/add" />
-          <Route element={<AdminEditProduct />} path="/admin/products/edit/:id" />
-          <Route element={<AdminCategories />} path="/admin/categories" />
-          <Route element={<AdminProducts />} path="/admin/products" />
-          <Route element={<Admin />} path="/admin" />
+
+
+          <Route element={<AdminAuth children={<AdminAddProduct />} />} path="/admin/products/add" />
+          <Route element={<AdminAuth children={<AdminEditProduct />} />} path="/admin/products/edit/:id" />
+          <Route element={<AdminAuth children={<AdminCategories />} />} path="/admin/categories" />
+          <Route element={<AdminAuth children={<AdminProducts />} />} path="/admin/products" />
+          <Route element={<AdminAuth children={<Admin />} />} path="/admin" />
         </Routes>
       </AuthContextProvider>
     </BrowserRouter>

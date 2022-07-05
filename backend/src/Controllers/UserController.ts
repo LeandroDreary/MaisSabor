@@ -6,17 +6,16 @@ import DbConnect from "./../utils/dbConnect";
 
 class UserController {
   async list(request: Request, response: Response) {
-    const {  } = request.query;
+    const { } = request.query;
 
     // Connect to the database
     await DbConnect();
 
     // Get the users
-    const users = await User.find({}).exec()
+    const users = await User.find({}).select("-password").exec()
 
-    return response.send({users})
+    return response.send({ users })
   }
-
 
   async get(request: Request, response: Response) {
     const { _id } = request.query;
@@ -26,11 +25,12 @@ class UserController {
 
     // Verify if the data is valid
     if (typeof _id === "string") {
-      const user = await User.findById(_id).exec()
+      const user = await User.findById(_id).select("-password").exec()
 
       // Verifiy if found the user
-      if (user)
+      if (user) {
         return response.send({ user: user.toJSON() });
+      }
       else
         throw new Error("users/not-found")
     }
@@ -49,7 +49,8 @@ class UserController {
       password,
       email,
       link,
-      profilePicture
+      profilePicture,
+      admin: false
     });
 
     // Validating the informations
@@ -63,8 +64,12 @@ class UserController {
     // Saving the informations
     await postUser.save();
 
+    let userJson = postUser.toJSON()
+
+    delete userJson.password;
+
     // Return the data
-    return response.send({ user: postUser.toJSON() });
+    return response.send({ user: userJson });
   }
 
   async update(request: Request, response: Response) {
@@ -77,8 +82,8 @@ class UserController {
       _id,
       username,
       password,
-      email, 
-      link, 
+      email,
+      link,
       profilePicture
     });
 
@@ -86,15 +91,19 @@ class UserController {
     await user.validate()
 
     user.password = await hash(password, 8);
-    
+
     // Creating the schema
     const postUser = new User(user);
 
     // Saving the informations
     await postUser.save();
 
+    let userJson = postUser.toJSON()
+
+    delete userJson.password;
+
     // Return the data
-    return response.send({ user: postUser.toJSON() });
+    return response.send({ user: userJson });
   }
 
   async delete(request: Request, response: Response) {

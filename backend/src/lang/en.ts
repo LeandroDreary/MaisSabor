@@ -26,4 +26,10 @@ export default {
         message: "Name must to have at least 3 characteres.",
         status: 400
     },
+
+    // login errors
+    "authentication/email-password-incorrect": {
+        message: "Email or password incorrect try again.",
+        status: 400
+    },
 }

@@ -30,7 +30,7 @@ app.use(
   (err: Error, request: Request, response: Response, next: NextFunction) => {
     if (err instanceof Error) {
       // Get the error translated to the language you want
-      const error: { message: string, status: number } | undefined = GetError(process.env.LANGUAGE, err.message)
+      const error: { message: string, status: number } = GetError(err.message, process.env.LANGUAGE)
       // If found the error
       if (error)
         return response.status(error.status).json({ code: err.message, message: error.message });

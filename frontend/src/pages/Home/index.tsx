@@ -1,92 +1,87 @@
 import React, { useEffect, useState } from "react";
 import "./index.css";
-import Navbar from "./../../components/Navbar";
-import Footer from "./../../components/Footer";
-import { Card } from "./../../components/Card";
-import { FaWhatsapp } from "react-icons/fa";
-import AOS from "aos";
-import { ProductType } from "../../components/Forms/Product/CreateOrEdit";
+
 import api from "../../services/api";
-import { VscLoading as LoadingIcon, IoMdSad } from "react-icons/all";
+
+import Navbar from "../../components/Pages/Navbar";
+import Footer from "./../../components/Pages/Footer";
+import { ProductCard } from "../../components/Pages/ProductCard";
+
+import { ProductType } from "../../components/Forms/Product/CreateOrEdit";
 import { CategoryType } from "../../components/Forms/Category/CreateOrEdit";
+
+import { FaWhatsapp, BiError, VscLoading, IoMdSad } from "react-icons/all";
+
+import AOS from "aos";
 AOS.init();
 
+type Filters = {
+  category?: string;
+  search?: string;
+}
+
 const Home = () => {
-  // const RemoveUndefined = (obj: any) => Object.keys(obj).forEach(key => obj[key] === undefined ? delete obj[key] : {})
+  const [filters, setFilters] = useState<Filters>({ category: "", search: "" })
 
-  const [productsLoading, setProductsLoading] = useState<boolean>(false);
-  const [categoriesLoading, setCategoriesLoading] = useState<boolean>(false);
-  const [filters, setFilters] = useState<{ category?: string, search?: string }>({ category: "", search: "" })
-
-
-  const [products, setProducts] = useState<ProductType[]>();
-  const [categories, setCategories] = useState<CategoryType[]>([]);
+  const [getProducts, setGetProducts] = useState<{ success?: boolean, products: ProductType[] }>();
+  const [getCategories, setGetCategories] = useState<{ success?: boolean, categories: CategoryType[] }>();
 
 
-  const HandleLoadProducts = async () => {
-    setProductsLoading(true);
+  const HandleLoadProducts = async (loading: boolean, filters?: Filters) => {
+    if (!loading) {
+      setGetProducts({ success: undefined, products: [] });
 
-    if (!productsLoading)
       try {
         var params = new URLSearchParams();
 
-        if (filters.category) params.append("category", filters.category)
-        if (filters.search) params.append("search", filters.search)
+        if (filters?.category) params.append("category", filters.category)
+        if (filters?.search) params.append("search", filters.search)
 
         // Get the products in the database
         await api.get(`/products/list?${params.toString()}`).then(resp => {
-          setProducts(resp.data.products)
+          setGetProducts({ success: true, products: resp.data.products });
         })
-      } finally {
-        setProductsLoading(false)
+      } catch (error) {
+        console.error(error)
+        setGetProducts({ success: false, products: [] })
       }
+    }
   };
 
+  const HandleLoadCategories = async (loading: boolean) => {
+    if (!loading) {
+      setGetCategories({ success: undefined, categories: [] });
 
-  const HandleLoadCategories = async () => {
-    setCategoriesLoading(true);
-
-    // Load the categories which will appear in the category select input
-    if (!categoriesLoading)
+      // Load the categories which will appear in the category select input
       try {
         await api.get("/categories/list").then(resp => {
-          setCategories(resp.data.categories)
+          setGetCategories({ success: true, categories: resp.data.categories })
         })
-      } finally {
-        setCategoriesLoading(false)
+      } catch (error) {
+        console.error(error)
+        setGetProducts({ success: false, products: [] })
       }
+    }
   };
 
-
   useEffect(() => {
-    HandleLoadProducts()
-    HandleLoadCategories()
+    HandleLoadProducts(false)
+    HandleLoadCategories(false)
   }, []);
 
   return (
     <>
-      <div
-        className="w-full bg-no-repeat min-h-screen sm:min-h-0 bg-fixed"
+      <div className="w-full bg-no-repeat min-h-screen sm:min-h-0 bg-cover bg-center"
         style={{
           backgroundImage: "url('/images/background.jpg')",
-          backgroundSize: "auto 100vh",
-        }}
-      >
-        <div
-          className="min-h-screen sm:min-h-0 bg-no-repeat bg-full bg-contain"
-          style={{
-            background:
-              "linear-gradient(-207deg, rgba(142,96,11,0.7) 0%, rgba(0,0,0,0.85) 100%)",
-          }}
-        >
+        }}>
+        <div className="min-h-screen sm:min-h-0 bg-no-repeat bg-full bg-contain" style={{
+          background:
+            "linear-gradient(-207deg, rgba(142,96,11,0.7) 0%, rgba(0,0,0,0.85) 100%)",
+        }}>
           <Navbar />
           <div className="container mx-auto z-10" style={{ minHeight: "27em" }}>
-            <div
-              data-aos="fade-right"
-              data-aos-duration="1000"
-              className="pt-12 p-4"
-              style={{ maxWidth: "650px" }}
-            >
+            <div data-aos="fade-right" data-aos-duration="1000" className="pt-12 p-4" style={{ maxWidth: "650px" }}>
               <h1 style={{ color: "#facc3a" }} className="text-4xl font-ubuntu">
                 O seu restaurante favorito agora presente na sua tela.
               </h1>
@@ -111,19 +106,21 @@ const Home = () => {
           Cardápio
         </h2>
         <div className="mt-2 py-4 px-2 mx-2 pb-8 bg-white border border-barbina-brown rounded-lg shadow-sm">
-          <form onSubmit={e => { e.preventDefault(); HandleLoadProducts() }} className="sm:flex mb-4">
+          <form onSubmit={e => { e.preventDefault(); HandleLoadProducts(getProducts?.success === undefined, filters) }} className="sm:flex mb-4">
             <button type="submit" className="w-full sm:w-auto sm:mx-2 bg-yellow-400 duration-300 hover:bg-yellow-500 text-barbina-brown h-10 py-2 px-6 rounded cursor-pointer">
               Procurar
             </button>
             <div className="w-full my-2 sm:my-0 sm:w-40 h-10 p-1 flex border border-barbina-brown rounded">
               <select onChange={e => setFilters({ category: e.target.value, search: filters?.search })} className="mx-2 text-barbina-light-brown form-select w-full">
                 <option value="">Todas</option>
-                {categories &&
-                  categories.map((category) => (
+                {
+                  getCategories?.success &&
+                  getCategories?.categories.map(category => (
                     <option key={category._id} value={category._id}>
                       {category.name}
                     </option>
-                  ))}
+                  ))
+                }
               </select>
             </div>
             <div className="w-full sm:mx-2">
@@ -137,25 +134,38 @@ const Home = () => {
               </div>
             </div>
           </form>
-          <hr className="border-barbina-brown" />
-          <div className="grid grid-cols-5 content-center gap-2 px-2">
-            <div className="sm:col-span-5"></div>
-            {productsLoading ? (
-              <span className="col-span-5 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">Carregando
-                <LoadingIcon className="rotate" />
-              </span>
-            ) : !products || products?.length <= 0 ?
-              <span className="col-span-5 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">Sem resultados encontrados
-                <IoMdSad />
-              </span>
-              :
-              products.map(product => {
-                return (
-                  <Card key={product._id} product={product} />
-                )
-              })
-            }
-          </div>
+          <hr />
+          {
+            getProducts?.success === undefined &&
+            <span className="w-full py-40 flex items-center justify-center text-xl gap-2 text-barbina-brown">Carregando
+              <VscLoading className="animate-spin" />
+            </span>
+          }
+
+          {
+            getProducts?.success === false &&
+            <span className="w-full py-40 flex items-center justify-center text-xl gap-2 text-barbina-brown">Erro ao carregar produtos
+              <BiError />
+            </span>
+          }
+
+          {getProducts?.success &&
+            <>
+              <div className="flex grid grid-cols-6 lg:grid-cols-5 px-2">
+                {
+                  getProducts?.products?.map(product =>
+                    <ProductCard key={product._id} product={product} />
+                  )
+                }
+              </div>
+
+              {
+                getProducts?.products.length === 1 &&
+                (<span className="w-full py-40 flex items-center justify-center text-xl gap-2 text-barbina-brown">Sem resultados encontrados
+                  <IoMdSad />
+                </span>)
+              }
+            </>}
         </div>
       </div>
       <Footer />

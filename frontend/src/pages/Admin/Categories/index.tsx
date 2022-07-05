@@ -1,11 +1,14 @@
-import React, { FormEvent, useState } from "react";
-import { useEffect } from "react";
-import CreateOrEditCategory, { CategoryType } from "../../../components/Forms/Category/CreateOrEdit";
-import Outclick from "../../../components/Outclick";
+import React, { FormEvent, useState, useEffect } from "react";
+
 import api, { authorization } from "../../../services/api";
-import { BiTrash, BiPencil, VscLoading } from "react-icons/all";
-import "./index.css";
+
+import CreateOrEditCategory, { CategoryType } from "../../../components/Forms/Category/CreateOrEdit";
+import Outclick from "../../../components/Utils/Outclick";
+
 import AdminLayout from "../../../layout/AdminLayout";
+
+import "./index.css";
+import { VscLoading, BiTrash, BiPencil } from "react-icons/all"
 
 const Index = () => {
   // The popup selected to show in the screen 
@@ -117,9 +120,7 @@ const Index = () => {
                         Deseja apagar a categoria "{deleteSelectedCategory?.name}" permanentemente?
                       </p>
                       <hr className="my-4" />
-                      <button
-                        className="mx-2 text-white h-10 hover:bg-red-700 bg-red-500 py-2 px-6 rounded cursor-pointer"
-                        type="submit">
+                      <button type="submit" className="mx-2 text-white h-10 hover:bg-red-700 bg-red-500 py-2 px-6 rounded cursor-pointer">
                         Apagar categoria
                       </button>
                     </form>
@@ -146,8 +147,7 @@ const Index = () => {
             </button>
             <button
               onClick={HandleLoadCategories}
-              className="bg-yellow-500 hover:bg-yellow-700 flex items-center gap-1 text-white py-1 mx-2 my-4 px-3 rounded cursor-pointer"
-            >
+              className="bg-yellow-500 hover:bg-yellow-700 flex items-center gap-1 text-white py-1 mx-2 my-4 px-3 rounded cursor-pointer">
               Atualizar
             </button>
           </div>
@@ -157,10 +157,7 @@ const Index = () => {
             )
           }
           <hr />
-          <div
-            style={{ maxWidth: "950px" }}
-            className="grid grid-cols-4 gap-4 mx-4 px-4 py-4"
-          >
+          <div style={{ maxWidth: "950px" }} className="grid grid-cols-4 gap-4 mx-4 px-4 py-4">
             {
               loading ?
                 <span className="col-span-4 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">
@@ -169,10 +166,7 @@ const Index = () => {
                 categories &&
                 categories.map((category) => {
                   return (
-                    <div
-                      key={category._id}
-                      className="col-span-4 sm:col-span-2 lg:col-span-1 border rounded shadow-lg bg-white p-2"
-                    >
+                    <div key={category._id} className="col-span-4 sm:col-span-2 lg:col-span-1 border rounded shadow-lg bg-white p-2">
                       <h2 className="pb-2 px-2 text-xl text-gray-600">
                         {category.name}
                       </h2>
@@ -184,8 +178,7 @@ const Index = () => {
                               setEditSelectedCategory(category);
                               setPopup("edit-category");
                             }}
-                            className="bg-yellow-500 mb-2 hover:bg-yellow-700 flex items-center gap-1 text-white py-1 text-sm px-3 rounded cursor-pointer"
-                          >
+                            className="bg-yellow-500 mb-2 hover:bg-yellow-700 flex items-center gap-1 text-white py-1 text-sm px-3 rounded cursor-pointer">
                             <BiPencil /> Editar
                           </button>
                         </div>
@@ -195,8 +188,7 @@ const Index = () => {
                               setDeleteSelectedCategory(category);
                               setPopup("delete-category");
                             }}
-                            className=" bg-red-500 hover:bg-red-700 flex items-center gap-1 text-white py-1 text-sm px-3 rounded cursor-pointer"
-                          >
+                            className=" bg-red-500 hover:bg-red-700 flex items-center gap-1 text-white py-1 text-sm px-3 rounded cursor-pointer">
                             <BiTrash /> apagar
                           </button>
                         </div>

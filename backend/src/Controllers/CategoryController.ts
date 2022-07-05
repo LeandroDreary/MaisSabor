@@ -10,7 +10,7 @@ class CategoryController {
         // Connect to the database
         await DbConnect();
 
-        const categories = await Category.find({}).exec()
+        const categories = await Category.find({}).select("-__v").exec()
 
         // Return the data
         return response.send({ categories: categories.map(category => category.toJSON()) });
@@ -26,7 +26,7 @@ class CategoryController {
         if (typeof _id !== 'string')
             throw new Error("category/invalid-informations")
 
-        const category = await Category.findById(_id).exec()
+        const category = await Category.findById(_id).select("-__v").exec()
 
         // Verifiy if found the category
         if (!category)
@@ -96,14 +96,14 @@ class CategoryController {
             throw new Error("category/invalid-informations")
 
         // The function "ConvertId" also verify if the id is valid
-        const category = await Category.findById(_id).exec()
+        const category = await Category.findById(_id).select("-__v").exec()
 
         // Verifiy if found the category
         if (!category)
             throw new Error("category/not-found");
 
         // Verifiy if category can be deleted
-        await (new CategoryEntity({ _id, name: "..." })).applyToDelete()
+        await (new CategoryEntity(category.toJSON())).applyToDelete()
         
         // Removing the category
         await category.remove()

@@ -1,6 +1,7 @@
+import "./index.css";
+
 import CreateOrEditProduct from "../../../../components/Forms/Product/CreateOrEdit";
 import AdminLayout from "../../../../layout/AdminLayout";
-import "./index.css";
 
 const Index = () => {  
   return (
