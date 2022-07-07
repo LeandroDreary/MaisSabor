@@ -20,7 +20,7 @@
     "mongodb": "^3.6.10",
     "mongoose": "^5.13.2",
     "node-fetch": "^2.6.1",
-    "sharp": "^0.28.3",
+    "sharp": "^0.30.5",
     "ts-node": "^10.8.1",
     "validator": "^13.7.0"
   },
