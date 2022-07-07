@@ -114,7 +114,7 @@ class UserController {
 
     // If is _id string
     if (typeof _id !== 'string')
-      throw new Error("user/invalid-informations")
+      throw new Error("user/field/id/invalid-id")
 
     // tje function "ConvertId" also verify if the id is valid
     const user = await User.findById(_id).exec()

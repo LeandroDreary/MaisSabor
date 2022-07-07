@@ -1,13 +1,17 @@
 import { Types } from "mongoose";
+import { Category } from "../Model/CategoryModel";
+import { Product } from "../Model/ProductModel";
+import dbConnect from "../utils/dbConnect";
 
 export type ProductModelT = {
     _id?: Types.ObjectId;
     name: string;
-    image: string;
-    deleteImageUrl: string;
+    image?: string;
+    deleteImageUrl?: string;
     category: Types.ObjectId;
     price: number;
     description: string;
+    ingredients: Types.ObjectId[];
 };
 
 class ProductEntity {
@@ -15,23 +19,37 @@ class ProductEntity {
 
     readonly name: string;
 
-    readonly image: string;
-
-    readonly deleteImageUrl: string;
-
     readonly category: Types.ObjectId;
 
     readonly price: number;
 
     readonly description: string;
 
-    constructor({ _id, name, price, image, deleteImageUrl, description, category }: { _id?: string, name: string, image: string, deleteImageUrl: string, price: number, description: string, category: string }) {
-        if (name.length < 3)
-            throw new Error("products/invalid-name-length")
+    readonly ingredients: Types.ObjectId[];
+
+    image?: string;
+
+    deleteImageUrl?: string;
+
+    async validate() {
+        // Connect to the database
+        await dbConnect()
+
+        if (!this?._id) throw new Error("product/id/invalid-id")
+
+        if (!(await Product.findById(this._id).exec())) throw new Error("product/not-found")
+
+        if (!(await Category.findById(this.category).exec())) throw new Error("category/not-found")
+
+        if (this.name.length < 3) throw new Error("product/name/must-be-3-of-length")
+    }
+
+    constructor({ _id, name, price, image, deleteImageUrl, description, category, ingredients }: Omit<ProductModelT, "category" | "_id" | "ingredients"> & { _id?: string, category: string, ingredients: string[] }) {
         if (_id)
             this._id = Types.ObjectId(_id);
 
         this.category = Types.ObjectId(category);
+        this.ingredients = ingredients.map(ingredient => Types.ObjectId(ingredient));
 
         this.name = name;
         this.image = image;

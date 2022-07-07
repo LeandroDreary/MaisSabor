@@ -5,9 +5,6 @@ import { Product } from "../Model/ProductModel";
 import DbConnect from "../utils/dbConnect";
 import { uploadFile } from "../services/ImageManagementService";
 import fetch from 'node-fetch';
-import { Types } from "mongoose";
-
-const RemoveUndefined = (obj: any) => Object.keys(obj).forEach(key => obj[key] === undefined ? delete obj[key] : {})
 
 const rgx = (pattern) => (new RegExp(`.*${pattern}.*`));
 
@@ -41,7 +38,7 @@ class ProductController {
         if (typeof _id !== 'string')
             throw new Error("products/invalid-informations")
 
-        const product = await Product.findById(_id).collation({ locale: "en", strength: 2 }).select("-deleteImageUrl").exec()
+        const product = await Product.findById(_id).select("-deleteImageUrl").exec()
 
         // Verifiy if found the product
         if (!product)
@@ -53,98 +50,101 @@ class ProductController {
 
     async post(request: Request, response: Response) {
         const form = new formidable.IncomingForm()
-        return await form.parse(request, async (err, fields, files) => {
-            const name = fields.name.toString()
-            const category = fields.category.toString()
-            const description = fields.description.toString()
-            const price = Number(fields.price)
-            let image = ""
-            let deleteImageUrl = ""
-
-            if (fields.image) {
-                image = fields.image.toString()
-            }
-            else if (files.image) {
-                const { img, delImgUrl } = await uploadFile(files.image)
-                image = img
-                deleteImageUrl = delImgUrl
-            }
-
-            // Connect to the database
-            await DbConnect();
-
-            const productEntity = new ProductEntity({
-                name,
-                image,
-                deleteImageUrl,
-                category,
-                description,
-                price
-            });
-
-            // Creating the schema
-            const product = new Product(productEntity);
-
-            // Saving the informations
-            await product.save();
-
-            // Return the data
-            return response.send({ product: product.toJSON() });
+        let { _id, name, description, category, price, ingredients, image, files } = request.body
+        await form.parse(request, async (err, fields, fl) => {
+            _id = _id ?? fields?._id
+            name = name ?? fields?.name
+            description = description ?? fields?.description
+            category = category ?? fields?.category
+            price = price ?? fields?.price
+            ingredients = ingredients ?? fields?.ingredients
+            image = image ?? fields?.image
+            files = fl
         })
+
+        // Connect to the database
+        await DbConnect();
+
+        if (!Array.isArray(JSON.parse(ingredients.toString())) && ingredients !== undefined)
+            throw new Error("product/ingredients-need-to-be-array")
+
+        const productEntity = new ProductEntity({
+            _id, name, description, category,
+            price: Number(price), ingredients: JSON.parse((ingredients ?? []).toString())
+        })
+
+        // Validate information
+        await productEntity.validate()
+
+        if (image) {
+            productEntity.image = image.toString()
+        }
+        else if (files.image) {
+            const { img, delImgUrl } = await uploadFile(files.image)
+            productEntity.image = img
+            productEntity.deleteImageUrl = delImgUrl
+        }
+
+        // Creating the schema
+        const product = new Product(productEntity);
+
+        // Saving the informations
+        await product.save();
+
+        // Return the data
+        return response.send({ product: product.toJSON() });
+
     }
 
     async update(request: Request, response: Response) {
         const form = new formidable.IncomingForm()
-        return await form.parse(request, async (err, fields, files) => {
-            const _id = fields._id.toString()
-
-            // Connect to the database
-            await DbConnect();
-
-            // If is _id string
-            if (typeof _id !== 'string')
-                throw new Error("products/invalid-informations")
-
-            // Try to find the product
-            const product = await Product.findById(_id).exec()
-
-            // Verifying if found the product
-            if (!product)
-                throw new Error("products/not-found")
-
-            if (fields.name)
-                product.name = fields.name.toString()
-
-            if (fields.category)
-                product.category = Types.ObjectId(fields.category.toString())
-
-            if (fields.description)
-                product.description = fields.description.toString()
-
-            if (fields.price)
-                product.price = Number(fields.price)
-
-            if (fields.image) {
-                product.image = fields.image.toString()
-            }
-            else if (files.image) {
-                const { image, deleteImageUrl } = await uploadFile(files.image)
-                product.image = image
-                try {
-                    await fetch(product.deleteImageUrl)
-                } catch (e) { }
-                product.deleteImageUrl = deleteImageUrl
-
-            } else {
-                product.image = ""
-            }
-
-            // Updating the product datas
-            await product.save();
-
-            // Return the data
-            return response.send({ product: product.toJSON() });
+        let { _id, name, description, category, price, ingredients, image, files } = request.body
+        await form.parse(request, async (err, fields, fl) => {
+            _id = _id ?? fields?._id
+            name = name ?? fields?.name
+            description = description ?? fields?.description
+            category = category ?? fields?.category
+            price = price ?? fields?.price
+            ingredients = ingredients ?? fields?.ingredients
+            image = image ?? fields?.image
+            files = fl
         })
+
+        // Connect to the database
+        await DbConnect();
+
+        if (!Array.isArray(JSON.parse(ingredients.toString())) && ingredients !== undefined)
+            throw new Error("product/ingredients-need-to-be-array")
+
+        const productEntity = new ProductEntity({
+            _id, name, description, category,
+            price: Number(price), ingredients: JSON.parse((ingredients ?? []).toString())
+        })
+
+        // Validate information
+        await productEntity.validate()
+
+        if (image) {
+            productEntity.image = image.toString()
+        }
+        else if (files.image) {
+            const { image, deleteImageUrl } = await uploadFile(files.image)
+            productEntity.image = image
+            try {
+                await fetch(productEntity.deleteImageUrl)
+            } catch (e) { }
+            productEntity.deleteImageUrl = deleteImageUrl
+
+        } else {
+            productEntity.image = ""
+        }
+
+        // Updating the product datas
+        let product = await Product.findOneAndUpdate({ _id: productEntity._id }, productEntity)
+
+        // Return the data
+        return response.send({ product: product.toJSON() });
+
     }
 
     async delete(request: Request, response: Response) {

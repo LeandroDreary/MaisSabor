@@ -31,7 +31,7 @@ export function AuthContextProvider(props: AuthContextProviderProps) {
         if (localStorage.getItem('token'))
             api.get("/login", { headers: { authorization } }).then(response => {
                 setUserInfo(response.data.user);
-            }).catch(err => { console.error(err); throw err }).finally(() => setDidEffect(true))
+            }).catch(err => { console.error(err) }).finally(() => setDidEffect(true))
     }, [])
 
     async function signInWithGoogle() {

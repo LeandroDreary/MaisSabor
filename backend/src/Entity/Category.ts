@@ -19,7 +19,7 @@ class CategoryEntity {
         if (categories.length > 0) throw new Error("category/delete/there-are-products")
     }
 
-    constructor({ _id, name }: { _id?: string, name: string }) {
+    constructor({ _id, name }: CategoryModelT & { _id?: string }) {
         if (name.length < 3)
             throw new Error("category/invalid-name-length")
         if (_id)

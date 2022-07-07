@@ -41,7 +41,6 @@ app.use(
       status: "error",
       message: "Internal Server Error",
     }));
-
   }
 );
 

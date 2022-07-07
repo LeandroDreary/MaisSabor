@@ -1,8 +1,11 @@
 import { Router } from "express";
+
 import { AuthenticateUserController } from "./Controllers/AuthenticateUserController";
 import { UserController } from "./Controllers/UserController";
 import { CategoryController } from "./Controllers/CategoryController";
 import { ProductController } from "./Controllers/ProductController";
+import { IngredientController } from "./Controllers/IngredientController";
+
 import { ensureAdminAuthenticated, ensureAuthenticated } from "./middlewares/ensureAutenticated";
 
 const router = Router();
@@ -12,6 +15,7 @@ const authenticateUserController = new AuthenticateUserController();
 const userController = new UserController();
 const productController = new ProductController();
 const categoryController = new CategoryController();
+const ingredientController = new IngredientController();
 
 // Auth routes
 router.post("/login", authenticateUserController.post);
@@ -37,5 +41,12 @@ router.get("/categories", categoryController.get);
 router.post("/categories", ensureAdminAuthenticated, categoryController.post);
 router.put("/categories", ensureAdminAuthenticated, categoryController.update);
 router.delete("/categories", ensureAdminAuthenticated, categoryController.delete);
+
+// Ingredients routes
+router.get("/ingredients/list", ingredientController.query);
+router.get("/ingredients", ingredientController.get);
+router.post("/ingredients", ensureAdminAuthenticated, ingredientController.post);
+router.put("/ingredients", ensureAdminAuthenticated, ingredientController.update);
+router.delete("/ingredients", ensureAdminAuthenticated, ingredientController.delete);
 
 export { router };

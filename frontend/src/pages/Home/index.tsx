@@ -38,7 +38,7 @@ const Home = () => {
         if (filters?.search) params.append("search", filters.search)
 
         // Get the products in the database
-        await api.get(`/products/list?${params.toString()}`).then(resp => {
+        await api.get(`/products/list`, { params }).then(resp => {
           setGetProducts({ success: true, products: resp.data.products });
         })
       } catch (error) {
@@ -160,7 +160,7 @@ const Home = () => {
               </div>
 
               {
-                getProducts?.products.length === 1 &&
+                getProducts?.products.length === 0 &&
                 (<span className="w-full py-40 flex items-center justify-center text-xl gap-2 text-barbina-brown">Sem resultados encontrados
                   <IoMdSad />
                 </span>)

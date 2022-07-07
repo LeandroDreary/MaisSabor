@@ -16,7 +16,7 @@ type CreateOrEditCategoryProps = {
   datas: {
     category?: CategoryType;
   };
-  callBack?: () => any;
+  callBack?: (id: string) => any;
 };
 
 const Index = ({ datas, callBack }: CreateOrEditCategoryProps) => {
@@ -58,7 +58,7 @@ const Index = ({ datas, callBack }: CreateOrEditCategoryProps) => {
       // If it's going to update or create a category
       if (!datas.category?._id) {
         // Create category
-        await api.post("/categories", { name }, { headers: { authorization } }).then(() => callBack && callBack()).catch(error => {
+        await api.post("/categories", { name }, { headers: { authorization } }).then(resp => callBack && callBack(resp.data?.category?._id)).catch(error => {
           console.error(error.response.data)
           if (error.response.data.message)
             setErrors([{ ...error.response.data, showIn: "sendForm" }])
@@ -68,8 +68,8 @@ const Index = ({ datas, callBack }: CreateOrEditCategoryProps) => {
         })
       } else {
         // Update category
-        await api.put("/categories", { _id: datas.category?._id, name }, { headers: { authorization } }).then(() =>
-          callBack && callBack()
+        await api.put("/categories", { _id: datas.category?._id, name }, { headers: { authorization } }).then(resp =>
+          callBack && callBack(resp.data?.category?._id)
         ).catch(error => {
           if (error.response.data.message)
             setErrors([{ ...error.response.data, showIn: "sendForm" }])
@@ -84,13 +84,7 @@ const Index = ({ datas, callBack }: CreateOrEditCategoryProps) => {
   };
 
   return (
-    <form
-      data-aos="fade-down"
-      data-aos-duration="500"
-      className="bg-white p-8 rounded w-screen"
-      onSubmit={HandleSubmit}
-      style={{ maxWidth: "400px" }}
-    >
+    <form data-aos="fade-down" data-aos-duration="500" className="bg-white p-8 rounded w-screen" onSubmit={HandleSubmit} style={{ maxWidth: "400px" }}>
       <h2 className="text-2xl my-2 font-semibold text-gray-700">
         {datas.category?._id ? "Editar categoria" : "Nova categoria"}
       </h2>
@@ -108,24 +102,16 @@ const Index = ({ datas, callBack }: CreateOrEditCategoryProps) => {
           Nome:
         </label>
         <div className="bg-white flex border border-gray-200 rounded">
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            name="name"
-            placeholder="Nome"
-            className="p-1 px-2 appearance-none outline-none w-full text-gray-600"
-          />
+          <input value={name} onChange={(e) => setName(e.target.value)} name="name" placeholder="Nome"
+            className="p-1 px-2 appearance-none outline-none w-full text-gray-600" />
         </div>
         <div>
           <Warning datas={{ warnings, input: "name" }} />
         </div>
       </div>
       <hr className="my-4" />
-      <button
-        style={{ background: "rgb(237, 201, 0)" }}
-        className="mx-2 filter hover:brightness-50 text-white h-10 py-2 px-6 rounded cursor-pointer"
-        type="submit"
-      >
+      <button style={{ background: "rgb(237, 201, 0)" }} className="mx-2 filter hover:brightness-50 text-white h-10 py-2 px-6 rounded cursor-pointer"
+        type="submit">
         {datas.category?._id ? "Editar categoria" : "Criar categoria"}
       </button>
     </form>

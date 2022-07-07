@@ -19,6 +19,7 @@ export type ProductType = {
   category?: string;
   price?: number;
   image?: string;
+  ingredients?: string[];
 };
 
 type CreateOrEditProductProps = {
@@ -50,13 +51,10 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
 
   // The category will display in the category input
   const [categories, setCategories] = useState<CategoryType[]>([]);
-
+  const [ingredients, setIngredients] = useState<{ _id: string; name: string; }[]>([]);
 
   // form inputs
-  const [name, setName] = useState<string>(datas.product?.name || "");
-  const [description, setDescription] = useState<string>(datas.product?.description || "");
-  const [category, setCategory] = useState<string>(datas.product?.category || "");
-  const [price, setPrice] = useState<number>(datas.product?.price || 0.0);
+  const [productForm, setProductForm] = useState<ProductType>(datas.product)
   const [files, setFiles] = useState<(File & { preview: string } | any & { preview: string })[]>(datas.product?.image ? [{ preview: datas.product?.image }] : []);
 
 
@@ -71,9 +69,9 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
       const myWarnings: WarningType[] = [];
 
       // datas filter
-      if (name.length < 3)
+      if ((productForm?.name ?? "").length < 3)
         myWarnings.push({ input: "name", message: "O nome do produto deve ter no mínimo 3 caracteres.", type: "warning" });
-      if (!category)
+      if (!productForm?.category)
         myWarnings.push({ input: "category", message: "Você não selecionou uma categoria.", type: "warning" });
 
       setWarnings(myWarnings);
@@ -82,10 +80,11 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
 
       // Saving data
       let form = new FormData()
-      form.append("name", name)
-      form.append("description", description)
-      form.append("category", category)
-      form.append("price", price.toString())
+      form.append("name", productForm.name)
+      form.append("description", productForm.description)
+      form.append("category", productForm.category)
+      form.append("price", productForm.price.toString())
+      form.append("ingredients", JSON.stringify(productForm.ingredients))
 
       if (files[0]?.name)
         form.append("image", files[0])
@@ -108,7 +107,6 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
         // Update product
         form.append("_id", datas.product._id)
         await api.put("/products", form, { headers: { authorization } }).then(response => {
-          console.log(response.data)
           navigate("/admin/products");
         }).catch(error => {
           console.error(error.response.data)
@@ -130,8 +128,15 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
     })
   };
 
+  const HandleLoadIngredients = async () => {
+    await api.get("/ingredients/list").then(response => {
+      setIngredients(response.data.ingredients)
+    })
+  };
+
   useEffect(() => {
     HandleLoadCategories();
+    HandleLoadIngredients();
   }, []);
 
   return (
@@ -144,12 +149,7 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
               {
                 {
                   "create-category": (
-                    <CreateOrEditCategory
-                      datas={{}}
-                      callBack={() => {
-                        HandleLoadCategories();
-                        setPopup("");
-                      }}
+                    <CreateOrEditCategory datas={{}} callBack={idCategory => { console.log(idCategory); setProductForm({ ...productForm, category: idCategory }); HandleLoadCategories(); setPopup(""); }}
                     />
                   ),
                   "": <></>,
@@ -159,11 +159,7 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
           </Outclick>
         </div>
       )}
-      <form
-        onSubmit={HandleSubmit}
-        style={{ maxWidth: "700px" }}
-        className="mx-4 px-4 py-4 my-4"
-      >
+      <form onSubmit={HandleSubmit} style={{ maxWidth: "700px" }} className="mx-4 px-4 py-4 my-4">
         {
           errors &&
           <div className="pb-2">
@@ -173,49 +169,23 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
           </div>
         }
         <div className="w-full my-2">
-          <Dropzone
-            accept="image/*"
-            onDrop={(acceptedFiles) => {
-              setFiles(
-                acceptedFiles.map(file =>
-                  Object.assign(file, {
-                    preview: URL.createObjectURL(file),
-                  })
-                )
-              );
-            }}
-          >
+          <Dropzone accept="image/*" onDrop={(acceptedFiles) => {
+            setFiles(acceptedFiles.map(file => Object.assign(file, { preview: URL.createObjectURL(file) })))
+          }}>
             {({ getRootProps, getInputProps }) => (
-              <section
-                style={{ maxWidth: "500px" }}
-                className="bg-yellow-50 text-yellow-700 border border-yellow-700 p-4"
-              >
+              <section style={{ maxWidth: "500px" }} className="bg-yellow-50 text-yellow-700 border border-yellow-700">
                 <div {...getRootProps()}>
                   <input {...getInputProps()} />
                   {files.length > 0 ? (
-                    files.map((file) => (
-                      <img
-                        key={file.name}
-                        className="max-h-80 mx-auto"
-                        src={file.preview}
-                        alt={file.name}
-                      />
+                    files.map(file => (
+                      <img key={file.name} className="max-h-80 mx-auto p-2" src={file.preview} alt={file.name} />
                     ))
-                  ) : (
-                    <p>
-                      Arraste uma imagem aqui ou clique para selecionar uma
-                      imagem.
-                    </p>
-                  )}
+                  ) : (<p className="p-4">Arraste uma imagem aqui ou clique para selecionar uma imagem.</p>)}
                 </div>
               </section>
             )}
           </Dropzone>
-          <button
-            type="button"
-            className="my-2 bg-red-600 hover:bg-red-800 ease-in-out duration-300 text-white py-2 px-4 "
-            onClick={() => setFiles([])}
-          >
+          <button type="button" className="my-2 bg-red-600 hover:bg-red-800 ease-in-out duration-300 text-white py-2 px-4 " onClick={() => setFiles([])}>
             Remover imagem
           </button>
         </div>
@@ -224,13 +194,7 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
             Nome:
           </label>
           <div className="bg-white flex border border-gray-200 rounded">
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              name="name"
-              placeholder="Nome"
-              className="p-1 px-2 appearance-none outline-none w-full text-gray-600"
-            />
+            <input value={productForm?.name} onChange={(e) => setProductForm({ ...productForm, name: e.target.value })} name="name" placeholder="Nome" className="p-1 px-2 appearance-none outline-none w-full text-gray-600" />
           </div>
           <Warning datas={{ warnings, input: "name" }} />
         </div>
@@ -239,13 +203,8 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
             Descrição:
           </label>
           <div className="bg-white flex border border-gray-200 rounded">
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              name="description"
-              placeholder="Descrição"
-              className="p-1 px-2 appearance-none outline-none w-full text-gray-600"
-            ></textarea>
+            <textarea value={productForm?.description} onChange={(e) => setProductForm({ ...productForm, description: e.target.value })} name="description"
+              placeholder="Descrição" className="p-1 px-2 appearance-none outline-none w-full text-gray-600"></textarea>
           </div>
           <Warning datas={{ warnings, input: "description" }} />
         </div>
@@ -255,14 +214,8 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
           </label>
           <div className="flex">
             <div className="bg-white px-1 w-40 flex border border-gray-200 rounded">
-              <select
-                value={category}
-                onChange={(e) => {
-                  setCategory(e.target.value);
-                }}
-                name="category"
-                className="form-select p-1 px-2 appearance-none outline-none w-full text-gray-600"
-              >
+              <select value={productForm?.category} onChange={(e) => setProductForm({ ...productForm, category: e.target.value })}
+                name="category" className="form-select p-1 px-2 appearance-none outline-none w-full text-gray-600">
                 <option value="">Escolher categoria</option>
                 {categories &&
                   categories.map((category) => (
@@ -272,11 +225,8 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
                   ))}
               </select>
             </div>
-            <button
-              onClick={() => setPopup("create-category")}
-              type="button"
-              className="mx-2 bg-yellow-400 hover:bg-yellow-500 duration-300 text-white h-10 py-2 px-6 rounded cursor-pointer"
-            >
+            <button onClick={() => setPopup("create-category")} type="button"
+              className="mx-2 bg-yellow-400 hover:bg-yellow-500 duration-300 text-white py-2 px-6 rounded cursor-pointer">
               Nova Categoria
             </button>
           </div>
@@ -288,17 +238,35 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
           </label>
           <div className="bg-white w-40 flex border border-gray-200 rounded">
             <CurrencyInput
-              name="price"
-              defaultValue={datas.product?.price || 0.0}
-              onValueChange={(value) =>
-                setPrice(Number(value?.replaceAll(",", ".")))
-              }
-              intlConfig={{ locale: "pt-BR", currency: "BRL" }}
-              decimalScale={2}
-              className="p-1 px-2 appearance-none outline-none w-full text-gray-600"
-            />
+              name="price" defaultValue={datas.product?.price || 0.0} onValueChange={(value) => setProductForm({ ...productForm, price: Number(value?.replaceAll(",", ".")) })}
+              intlConfig={{ locale: "pt-BR", currency: "BRL" }} decimalScale={2} className="p-1 px-2 appearance-none outline-none w-full text-gray-600" />
           </div>
           <Warning datas={{ warnings, input: "price" }} />
+        </div>
+        <div className="w-full my-2">
+          <label className="text-gray-600" htmlFor="ingredients">
+            Ingredientes:
+          </label>
+          <div className="flex">
+            <div className="grow bg-white w-full p-2 border border-gray-200 rounded">
+              {ingredients?.filter(ingredient => productForm?.ingredients?.includes(ingredient?._id)).map(ingredient =>
+                <button type="button" onClick={() => setProductForm({ ...productForm, ingredients: productForm.ingredients.filter(ing => ing !== ingredient._id) })} key={ingredient._id} className="inline-block border-green-500 text-green-500 rounded border px-2 m-2 cursor-pointer">
+                  {ingredient.name}
+                </button>
+              )}
+              {ingredients?.filter(ingredient => !productForm?.ingredients?.includes(ingredient?._id)).map(ingredient =>
+                <button type="button" onClick={() => setProductForm({ ...productForm, ingredients: [...productForm.ingredients, ingredient._id] })} key={ingredient._id} className="inline-block border-gray-500 text-gray-500 rounded border px-2 m-2 cursor-pointer">
+                  {ingredient.name}
+                </button>
+              )}
+
+            </div>
+            <div>
+              <button onClick={() => setPopup("create-category")} type="button" className="mx-2 bg-yellow-400 hover:bg-yellow-500 duration-300 text-white py-1 px-2 rounded cursor-pointer">
+                Novo Ingrediente
+              </button>
+            </div>
+          </div>
         </div>
         <hr className="my-4" />
         <button className="mx-2 text-white bg-yellow-400 hover:bg-yellow-500 duration-300 h-10 py-2 px-6 rounded cursor-pointer" type="submit">

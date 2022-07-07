@@ -7,7 +7,7 @@ import Icon from "./../../../../assets/images/icon.png";
 const index = () => {
   return (
     <>
-      <div className="h-screen bg-yellow-500 w-60 p-4 shadow-lg rounded">
+      <div className="h-screen bg-yellow-500 w-60 p-4 shadow-lg">
         <Link to={"/admin"}>
           <span>
             <img src={Icon} className="w-3/4 mx-auto z-40" alt="Icone Barbina" />
@@ -18,7 +18,7 @@ const index = () => {
           <h3 className="font-semibold text-barbina-brown my-3">
             <Link to={"/admin"}>Página Inicial</Link>
           </h3>
-          <h3 className="font-semibold text-barbina-brown my-3">produtos</h3>
+          <h3 className="font-semibold text-barbina-brown my-3">Produtos</h3>
           <div className="ml-1 text-sm pl-2 border-l text-barbina-light-brown border-black">
             <div className="my-3 duration-300 hover:text-barbina-brown">
               <Link className="flex items-center gap-2" to="/admin/products">
@@ -27,10 +27,7 @@ const index = () => {
               </Link>
             </div>
             <div className="my-3 duration-300 hover:text-barbina-brown">
-              <Link
-                className="flex items-center gap-2"
-                to="/admin/products/add"
-              >
+              <Link className="flex items-center gap-2" to="/admin/products/add">
                 <MdCreateNewFolder />
                 Novo produto
               </Link>

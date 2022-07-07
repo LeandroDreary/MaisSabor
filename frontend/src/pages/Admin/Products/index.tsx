@@ -20,33 +20,35 @@ const Index = () => {
 
   // Store ocurred errors when send data to api 
   const [errors, setErrors] = useState<{ code?: string, message: string, showIn: string }[]>();
-  const [loading, setLoading] = useState<boolean>(true);
   const [deleteSelectedProduct, setDeleteSelectedProduct] = useState<ProductType>();
 
-
   const [categories, setCategories] = useState<CategoryType[]>([]);
-  const [products, setProducts] = useState<ProductType[]>();
-
+  const [products, setProducts] = useState<{ loading: boolean, success: boolean, data: ProductType[] }>();
 
   // Search filter
   const [filters, setFilters] = useState<{ category?: string, search?: string }>()
 
 
   const HandleLoadProducts = async (filters?: { category?: string, search?: string }) => {
-    setLoading(true);
+    if (products?.loading) return;
+    setProducts({ loading: true, success: false, data: [] })
+
     try {
+      var params = new URLSearchParams();
+
+      if (filters?.category) params.append("category", filters.category)
+      if (filters?.search) params.append("search", filters.search)
+
       // Get the products in the database
-      await api.get("/products/list").then(response => {
-        setProducts(response.data.products)
-      }).catch(error => {
-        console.error(error.response.data)
-        if (error.response.data.message)
-          setErrors([{ ...error.response.data, showIn: "load" }])
-        else
-          setErrors([{ message: "Ocorreu um erro desconhecido ao carregar produtos.", showIn: "load" }])
+      await api.get("/products/list", { params }).then(response => {
+        setProducts({ loading: false, success: true, data: response.data.products })
+      }).catch(err => {
+        setProducts({ loading: false, success: false, data: [] })
+        throw err
       })
-    } finally {
-      setLoading(false)
+    } catch (err) {
+      if (err?.response?.data?.message)
+        setErrors([{ ...err.response.data, showIn: "load" }])
     }
   };
 
@@ -68,7 +70,7 @@ const Index = () => {
 
   const HandleDeleteProduct = async (e: FormEvent) => {
     e.preventDefault();
-    await api.delete(`/products?_id=${deleteSelectedProduct?._id}`, { headers: { authorization } }).then(() => {
+    await api.delete(`/products`, { params: { _id: deleteSelectedProduct?._id }, headers: { authorization } }).then(() => {
       HandleLoadProducts({});
       setPopup("")
     }).catch(error => {
@@ -90,24 +92,17 @@ const Index = () => {
     <>
       {popup !== "" && (
         <div style={{ zIndex: 80 }} className="fixed flex items-center justify-center top-0 left-0 h-screen w-screen bg-black bg-opacity-70">
-          <Outclick
-            callback={() => {
-              setPopup("");
-              setDeleteSelectedProduct(undefined);
-              setErrors([])
-            }}
-          >
+          <Outclick callback={() => {
+            setPopup("");
+            setDeleteSelectedProduct(undefined);
+            setErrors([])
+          }}>
             <div>
               {
                 {
                   "": <></>,
                   "delete-product": (
-                    <form
-                      data-aos="fade-down"
-                      data-aos-duration="1000"
-                      className="bg-white p-8 rounded"
-                      onSubmit={HandleDeleteProduct}
-                    >
+                    <form data-aos="fade-down" data-aos-duration="1000" className="bg-white p-8 rounded" onSubmit={HandleDeleteProduct}>
                       <h2 className="text-2xl font-semibold text-gray-700">
                         Apagar {deleteSelectedProduct?.name}
                       </h2>
@@ -180,46 +175,42 @@ const Index = () => {
               </div>
               <div className="w-full mx-2">
                 <div className="p-1 flex border border-gray-200 rounded">
-                  <input
-                    placeholder="Procurar"
-                    value={filters?.search}
-                    onChange={e => setFilters({ ...filters, search: e.target.value })}
-                    className="p-1 px-2 appearance-none outline-none w-full"
-                  />
+                  <input placeholder="Procurar" value={filters?.search} className="p-1 px-2 appearance-none outline-none w-full"
+                    onChange={e => setFilters({ ...filters, search: e.target.value })} />
                 </div>
               </div>
             </form>
             <hr />
-            <div className="grid sm:grid-cols-6 lg:grid-cols-5 gap-2 p-2">
-              {loading ? (
-                <span className="col-span-5 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">
-                  Carregando <VscLoading className="rotate" />
-                </span>
-              ) : !products ?
-                <span className="col-span-5 w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">
-                  Sem resultados encontrados
-                  <IoMdSad />
-                </span>
-                :
-                products.map(product => {
-                  return (
-                    <ProductCard key={product._id} product={product}>
-                      <hr className="border-barbina-light-brown" />
-                      <div className="pt-2 flex items-center gap-1 mb-2">
-                        <Link className="grow justify-center bg-yellow-500 ease-out duration-300 hover:bg-yellow-700 flex items-center gap-1 text-white py-1 text-sm rounded cursor-pointer" to={`/admin/products/edit/${product._id}`}>
-                          <BiPencil /> Editar
-                        </Link>
-                        <button onClick={() => {
-                          setDeleteSelectedProduct(product);
-                          setPopup("delete-product");
-                        }} className="grow justify-center bg-red-500 ease-out duration-300 hover:bg-red-700 flex items-center gap-1 text-white py-1 text-sm rounded cursor-pointer">
-                          <BiTrash /> Apagar
-                        </button>
-                      </div>
-                    </ProductCard>
-                  );
-                })}
-            </div>
+            {products?.loading &&
+              <span className="w-full text-barbina-brown py-40 flex items-center justify-center text-xl gap-2">
+                Carregando <VscLoading className="animate-spin" />
+              </span>}
+            {!products?.loading &&
+              <>
+                {products?.data.length === 0 &&
+                  <span className="w-full justify-center text-barbina-brown py-40 flex items-center text-xl gap-2">
+                    Sem resultados encontrados <IoMdSad />
+                  </span>}
+                <div className="grid sm:grid-cols-6 lg:grid-cols-5 gap-2 p-2">
+                  {products?.data.map(product =>
+                  (<ProductCard key={product._id} product={product}>
+                    <hr className="border-barbina-light-brown" />
+                    <div className="pt-2 flex items-center gap-1 mb-2">
+                      <Link className="grow justify-center bg-yellow-500 ease-out duration-300 hover:bg-yellow-700 flex items-center gap-1 text-white py-1 text-sm rounded cursor-pointer" to={`/admin/products/edit/${product._id}`}>
+                        <BiPencil /> Editar
+                      </Link>
+                      <button onClick={() => {
+                        setDeleteSelectedProduct(product);
+                        setPopup("delete-product");
+                      }} className="grow justify-center bg-red-500 ease-out duration-300 hover:bg-red-700 flex items-center gap-1 text-white py-1 text-sm rounded cursor-pointer">
+                        <BiTrash /> Apagar
+                      </button>
+                    </div>
+                  </ProductCard>)
+                  )}
+                </div>
+              </>
+            }
           </div>
 
         </div>
