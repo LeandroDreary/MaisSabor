@@ -189,8 +189,7 @@ const Index = () => {
 
 
                 <div className="grid sm:grid-cols-6 lg:grid-cols-5 gap-2 p-2">
-                  {products?.data.map(product =>
-                  (<ProductCard key={product._id} product={product}>
+                  {products?.data.map(product => (<ProductCard key={product._id} product={product}>
                     <hr className="border-barbina-light-brown" />
                     <div className="pt-2 flex items-center gap-1 mb-2">
                       <Link className="grow justify-center bg-yellow-500 ease-out duration-300 hover:bg-yellow-700 flex items-center gap-1 text-white py-1 text-sm rounded cursor-pointer" to={`/admin/products/edit/${product._id}`}>
