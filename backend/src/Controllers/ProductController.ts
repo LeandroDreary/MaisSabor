@@ -52,13 +52,13 @@ class ProductController {
         const form = new formidable.IncomingForm()
         let { _id, name, description, category, price, ingredients, image, files } = request.body
         await form.parse(request, async (err, fields, fl) => {
-            _id = _id ?? fields?._id
-            name = name ?? fields?.name
-            description = description ?? fields?.description
-            category = category ?? fields?.category
-            price = price ?? fields?.price
-            ingredients = ingredients ?? fields?.ingredients
-            image = image ?? fields?.image
+            _id = _id || fields?._id
+            name = name || fields?.name
+            description = description || fields?.description
+            category = category || fields?.category
+            price = price || fields?.price
+            ingredients = ingredients || fields?.ingredients
+            image = image || fields?.image
             files = fl
         })
 
@@ -74,7 +74,7 @@ class ProductController {
         })
 
         // Validate information
-        await productEntity.validate()
+        await productEntity.validate({ type: "create" })
 
         if (image) {
             productEntity.image = image.toString()
@@ -122,7 +122,7 @@ class ProductController {
         })
 
         // Validate information
-        await productEntity.validate()
+        await productEntity.validate({ type: "edit" })
 
         if (image) {
             productEntity.image = image.toString()

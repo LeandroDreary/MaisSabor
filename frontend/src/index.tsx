@@ -1,15 +1,16 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
+import Routes from './routes';
 
 import './css/tailwind.css';
 import "aos/dist/aos.css";
 import './css/index.css';
 
-import Routes from './routes';
-
-ReactDOM.render(
+const root = ReactDOM.createRoot(
+  document.getElementById('root') as HTMLElement
+);
+root.render(
   <React.StrictMode>
     <Routes />
-  </React.StrictMode>,
-  document.getElementById('root')
+  </React.StrictMode>
 );

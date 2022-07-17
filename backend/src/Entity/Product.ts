@@ -31,17 +31,20 @@ class ProductEntity {
 
     deleteImageUrl?: string;
 
-    async validate() {
+    async validate({ type }: { type: "create" | "edit" }) {
         // Connect to the database
         await dbConnect()
 
-        if (!this?._id) throw new Error("product/id/invalid-id")
-
-        if (!(await Product.findById(this._id).exec())) throw new Error("product/not-found")
+        if (this.name.length < 3) throw new Error("product/name/must-be-3-of-length")
 
         if (!(await Category.findById(this.category).exec())) throw new Error("category/not-found")
 
-        if (this.name.length < 3) throw new Error("product/name/must-be-3-of-length")
+        // Validating id in case is editing informations
+        if (type === "edit") {
+            if (!this?._id) throw new Error("product/id/invalid-id")
+
+            if (!(await Product.findById(this._id).exec())) throw new Error("product/not-found")
+        }
     }
 
     constructor({ _id, name, price, image, deleteImageUrl, description, category, ingredients }: Omit<ProductModelT, "category" | "_id" | "ingredients"> & { _id?: string, category: string, ingredients: string[] }) {

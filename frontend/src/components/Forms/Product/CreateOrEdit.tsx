@@ -54,8 +54,8 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
   const [ingredients, setIngredients] = useState<{ _id: string; name: string; }[]>([]);
 
   // form inputs
-  const [productForm, setProductForm] = useState<ProductType>(datas.product)
-  const [files, setFiles] = useState<(File & { preview: string } | any & { preview: string })[]>(datas.product?.image ? [{ preview: datas.product?.image }] : []);
+  const [productForm, setProductForm] = useState<ProductType>(datas?.product)
+  const [files, setFiles] = useState<(File & { preview: string } | any & { preview: string })[]>(datas?.product?.image ? [{ preview: datas?.product?.image }] : []);
 
 
   //Submit form
@@ -92,26 +92,26 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
         form.append("image", files[0].preview)
       }
 
-      if (!datas.product?._id) {
+      if (!datas?.product?._id) {
         // Create product
         await api.post("/products", form, { headers: { authorization } }).then(response => {
           navigate("/admin/products");
-        }).catch(error => {
-          console.error(error.response.data)
-          if (error.response.data.message)
-            setErrors([{ ...error.response.data, showIn: "sendForm" }])
+        }).catch(err => {
+          console.error(err)
+          if (err?.response?.data?.message)
+            setErrors([{ ...err.response.data, showIn: "sendForm" }])
           else
             setErrors([{ message: "Ocorreu um erro desconhecido.", showIn: "sendForm" }])
         })
       } else {
         // Update product
-        form.append("_id", datas.product._id)
+        form.append("_id", datas?.product?._id)
         await api.put("/products", form, { headers: { authorization } }).then(response => {
           navigate("/admin/products");
-        }).catch(error => {
-          console.error(error.response.data)
-          if (error.response.data.message)
-            setErrors([{ ...error.response.data, showIn: "sendForm" }])
+        }).catch(err => {
+          console.error(err)
+          if (err?.response?.data?.message)
+            setErrors([{ ...err.response.data, showIn: "sendForm" }])
           else
             setErrors([{ message: "Ocorreu um erro desconhecido.", showIn: "sendForm" }])
         })
@@ -238,7 +238,7 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
           </label>
           <div className="bg-white w-40 flex border border-gray-200 rounded">
             <CurrencyInput
-              name="price" defaultValue={datas.product?.price || 0.0} onValueChange={(value) => setProductForm({ ...productForm, price: Number(value?.replaceAll(",", ".")) })}
+              name="price" defaultValue={datas?.product?.price || 0.0} onValueChange={(value) => setProductForm({ ...productForm, price: Number(value?.replaceAll(",", ".")) })}
               intlConfig={{ locale: "pt-BR", currency: "BRL" }} decimalScale={2} className="p-1 px-2 appearance-none outline-none w-full text-gray-600" />
           </div>
           <Warning datas={{ warnings, input: "price" }} />
@@ -250,12 +250,12 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
           <div className="flex">
             <div className="grow bg-white w-full p-2 border border-gray-200 rounded">
               {ingredients?.filter(ingredient => productForm?.ingredients?.includes(ingredient?._id)).map(ingredient =>
-                <button type="button" onClick={() => setProductForm({ ...productForm, ingredients: productForm.ingredients.filter(ing => ing !== ingredient._id) })} key={ingredient._id} className="inline-block border-green-500 text-green-500 rounded border px-2 m-2 cursor-pointer">
+                <button type="button" onClick={() => setProductForm({ ...productForm, ingredients: productForm?.ingredients.filter(ing => ing !== ingredient._id) })} key={ingredient._id} className="inline-block border-green-500 text-green-500 rounded border px-2 m-2 cursor-pointer">
                   {ingredient.name}
                 </button>
               )}
               {ingredients?.filter(ingredient => !productForm?.ingredients?.includes(ingredient?._id)).map(ingredient =>
-                <button type="button" onClick={() => setProductForm({ ...productForm, ingredients: [...productForm.ingredients, ingredient._id] })} key={ingredient._id} className="inline-block border-gray-500 text-gray-500 rounded border px-2 m-2 cursor-pointer">
+                <button type="button" onClick={() => setProductForm({ ...productForm, ingredients: [...(productForm?.ingredients ?? []), ingredient._id] })} key={ingredient._id} className="inline-block border-gray-500 text-gray-500 rounded border px-2 m-2 cursor-pointer">
                   {ingredient.name}
                 </button>
               )}
@@ -270,7 +270,7 @@ const Index = ({ datas, callBack }: CreateOrEditProductProps) => {
         </div>
         <hr className="my-4" />
         <button className="mx-2 text-white bg-yellow-400 hover:bg-yellow-500 duration-300 h-10 py-2 px-6 rounded cursor-pointer" type="submit">
-          {loading ? "carregando..." : datas.product?._id ? "Editar produto" : "Criar produto"}
+          {loading ? "carregando..." : datas?.product?._id ? "Editar produto" : "Criar produto"}
         </button>
       </form>
     </>
